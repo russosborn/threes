@@ -19,6 +19,8 @@ namespace threes {
 	bool isBaseCombo = (value == 1 && other.value == 2) ||
 	                   (other.value == 2 && value == 1);
 	bool isMatch = (value > 2 && value == other.value);
+
+	return (isEmpty || isBaseCombo || isMatch);
       }
 
     };

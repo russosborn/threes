@@ -6,9 +6,9 @@
 
 #include <array>
 
-#include "Card.H"
+#include "Card.h"
 
-namspace threes {
+namespace threes {
   namespace game {
 
     enum ShiftDirection {
@@ -25,7 +25,7 @@ namspace threes {
       using storage_t = std::array<Card,DIM*DIM>;
       
     public:
-      class Board();
+      Board();
 
       // const access to underlying data
     public:
