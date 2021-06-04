@@ -5,20 +5,30 @@
  */
 
 #include <array>
-
+#include <set>
+#include "Utils.h"
 #include "Card.h"
+
+
 
 namespace threes {
   namespace game {
 
     enum ShiftDirection {
-     DIRECTION_UP,
-     DIRECTION_DOWN,
-     DIRECTION_LEFT,
-     DIRECTION_RIGHT
+      DIRECTION_UP,
+      DIRECTION_DOWN,
+      DIRECTION_LEFT,
+      DIRECTION_RIGHT
     };
-    
-    template<unsigned DIM>
+
+
+    /* 
+       DIM is the board size, RAND_GEN is a class 
+       matching the interface for uniform_int_distribution 
+       (the default should be fine for all practical purposes,
+       but generalizing the randomness makes testing easier)
+    */
+    template<unsigned DIM, class RAND_GEN=std::uniform_int_distribution<> >
     class Board {
 
     public:
@@ -102,7 +112,71 @@ namespace threes {
       }
       return(false);
     }
+    
+    /////////////////////
 
+    void shiftBoard(const ShiftDirection dir, const Card insertVal) {
+      static std::random_device rd;
+      static std::mt19937 gen(rd());
+      
+
+      bool isVertical = (dir == DIRECTION_UP || dir == DIRECTION_DOWN);
+      
+      if(isVertical)
+	ro::ASSERT( canShiftVertical(),
+		    "requested a vertical shift but board can't shift that way" );
+      else
+	ro::ASSERT( canShiftHorizontal(),
+		    "requested a vertical shift but board can't shift that way" );
+
+      std::vector<int> validShiftIdx;
+
+      // push all the direction conditional stuff here so the loop is clean
+      decltype(canShiftSliceVertical) canShiftFn( isVertical ? canShiftSliceVertical
+						             : canShiftSliceHorizontal);
+
+      // shifting across rows shifts by DIM at a time
+      const int shiftMultiplier = (isVerical ? DIM : 1);
+      // shifting up or left has a negative stride
+      const int shiftDirection = (dir == DIRECTION_UP || dir == DIRECTION_LEFT) ? -1 : 1;
+
+      const int shiftStartConst = 
+      
+      for(unsigned i=0; i<DIM; ++i) {
+	if(canShiftFn(i)) {
+	  validShiftIdx.push_back(i);
+	  doShiftFn(i);
+	}
+      }
+
+      // pick an available index according to the RAND_GEN
+      RAND_GEN insertSliceGen = RAND_GEN(0,validShiftIdx.size()-1);
+      const int insertSlice = insertSliceGen(gen);
+      const int insertIdx = validShiftIdx[insertSlice];
+
+      // TODO: put start index offset stuff here
+      
+      // figure out where on the board array that index lies
+      int arrayIdxInsert(-1);
+      if(dir == DIRECTION_UP) {
+	// pick something on the bottom row, which is the end of our array
+	arrayIdxInsert = DIM*DIM - DIM + insertIdx;
+      } else if (dir == DIRECTION_DOWN) {
+	// easy case, insert in the top row which is the beginning of the array
+	arrayIdxInsert = insertIdx;
+      } else if (dir == DIRECTION_RIGHT) {
+	// pick something in the first column
+	arrayIdxInsert = DIR*insertIdx;
+      } else if (dir == DIRECTION_LEFT) {
+	// insert in the the last column
+	arrayIdxInsert = DIR+DIR*insertIdx;
+      }
+
+      ro::ASSERT(arrayIdxInsert > 0);
+
+      
+    }
+      
     ////////////////////
     
     template<unsigned DIM>
