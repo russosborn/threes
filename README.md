@@ -11,3 +11,13 @@ cmake --build build
 
 ./build/example_test
 ```
+
+or
+
+```
+cmake -S . -B build-debug -DCMAKE_BUILD_TYPE=Debug
+
+cmake --build build-debug
+
+gdb ./build-debug/example_test
+```

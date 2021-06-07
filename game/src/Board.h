@@ -5,7 +5,7 @@
  */
 
 #include <array>
-#include <set>
+#include <random>
 #include "Utils.h"
 #include "Card.h"
 
@@ -55,7 +55,7 @@ namespace threes {
       void shiftBoard(const ShiftDirection dir, const Card insertVal);
       
     private:
-      Card& matrixIndex(const unsigned row, const unsigned col) const {
+      const Card& matrixIndex(const unsigned row, const unsigned col) const {
 	// todo: bounds check
 	const unsigned arrIdx = col + row*DIM;
 	return m_data[arrIdx];
@@ -82,8 +82,8 @@ namespace threes {
     // Template Implementations
     ///////////////////////////////////////////////
 
-    template<unsigned DIM>
-    Board<DIM>::Board() {
+    template<unsigned DIM, class RAND_GEN>
+    Board<DIM, RAND_GEN>::Board() {
       // for clarity/any potential future underlying changes,
       // this happens automatically with defaults
       std::fill(m_data.begin(), m_data.end(), Card(0));
@@ -91,8 +91,8 @@ namespace threes {
 
     /////////////////////
     
-    template<unsigned DIM>
-    bool Board<DIM>::canShiftVertical() const {
+    template<unsigned DIM, class RAND_GEN>
+    bool Board<DIM, RAND_GEN>::canShiftVertical() const {
       for(int i=0; i<DIM; ++i) {
 	if( canShiftSlice( i, static_cast<int>(DIM) ) ) {
 	  return(true);
@@ -103,8 +103,8 @@ namespace threes {
 
     /////////////////////
     
-    template<unsigned DIM>
-    bool Board<DIM>::canShiftHorizontal() const {
+    template<unsigned DIM, class RAND_GEN>
+    bool Board<DIM, RAND_GEN>::canShiftHorizontal() const {
       for(int i=0; i<DIM; ++i) {
 	if( canShiftSlice( static_cast<int>(DIM)*i, 1 ) ) {
 	  return(true);
@@ -115,13 +115,12 @@ namespace threes {
     
     /////////////////////
 
-    void shiftBoard(const ShiftDirection dir, const Card insertVal) {
+    template<unsigned DIM, class RAND_GEN>
+    void Board<DIM, RAND_GEN>::shiftBoard(const ShiftDirection dir, const Card insertVal) {
       static std::random_device rd;
       static std::mt19937 gen(rd());
-      
 
       bool isVertical = (dir == DIRECTION_UP || dir == DIRECTION_DOWN);
-      
       if(isVertical)
 	ro::ASSERT( canShiftVertical(),
 		    "requested a vertical shift but board can't shift that way" );
@@ -130,31 +129,30 @@ namespace threes {
 		    "requested a vertical shift but board can't shift that way" );
 
       std::vector<int> validShiftIdx;
-
-      // push all the direction conditional stuff here so the loop is clean
-      decltype(canShiftSliceVertical) canShiftFn( isVertical ? canShiftSliceVertical
-						             : canShiftSliceHorizontal);
-
+      // push all the direction conditional stuff here so the loop is clean //
+      
       // shifting across rows shifts by DIM at a time
-      const int shiftMultiplier = (isVerical ? DIM : 1);
-      // shifting up or left has a negative stride
-      const int shiftDirection = (dir == DIRECTION_UP || dir == DIRECTION_LEFT) ? -1 : 1;
-
-      const int shiftStartConst = 
+      const int shiftStrideMultiplier = (isVertical ? DIM : 1);
+      const int shiftStartMultiplier  = (isVertical ? 1 : DIM);
+      // shifting down or right has a negative stride b/c shift starts at end of row/column
+      const int shiftDirection = (dir == DIRECTION_DOWN || dir == DIRECTION_RIGHT) ? -1 : 1;
+      // shifting from left of bottom, we don't start our shift from 0 index
+      int shiftStartConst = 0;
+      if     (dir == DIRECTION_RIGHT) {shiftStartConst = DIM-1;}
+      else if(dir == DIRECTION_DOWN ) {shiftStartConst = DIM*(DIM-1);}
       
       for(unsigned i=0; i<DIM; ++i) {
-	if(canShiftFn(i)) {
+	const int shiftStartIdx = shiftStartConst + shiftStartMultiplier*i;
+	const int shiftStride = shiftDirection*shiftStrideMultiplier;
+	if(canShiftSlice(shiftStartIdx, shiftStride)) {
 	  validShiftIdx.push_back(i);
-	  doShiftFn(i);
+	  shiftSlice(shiftStartIdx, shiftStride);
 	}
       }
-
       // pick an available index according to the RAND_GEN
       RAND_GEN insertSliceGen = RAND_GEN(0,validShiftIdx.size()-1);
       const int insertSlice = insertSliceGen(gen);
       const int insertIdx = validShiftIdx[insertSlice];
-
-      // TODO: put start index offset stuff here
       
       // figure out where on the board array that index lies
       int arrayIdxInsert(-1);
@@ -166,21 +164,21 @@ namespace threes {
 	arrayIdxInsert = insertIdx;
       } else if (dir == DIRECTION_RIGHT) {
 	// pick something in the first column
-	arrayIdxInsert = DIR*insertIdx;
+	arrayIdxInsert = DIM*insertIdx;
       } else if (dir == DIRECTION_LEFT) {
 	// insert in the the last column
-	arrayIdxInsert = DIR+DIR*insertIdx;
+	arrayIdxInsert = DIM+DIM*insertIdx;
       }
+      ro::ASSERT(arrayIdxInsert > 0, "invalid insertion dir");
 
-      ro::ASSERT(arrayIdxInsert > 0);
-
-      
+      ro::ASSERT(m_data[arrayIdxInsert] == 0, "trying to insert at already occupied slot");
+      m_data[arrayIdxInsert] = insertVal;
     }
       
     ////////////////////
     
-    template<unsigned DIM>
-    void Board<DIM>::shiftSlice(const int startIdx, const int stride) {
+    template<unsigned DIM, class RAND_GEN>
+    void Board<DIM, RAND_GEN>::shiftSlice(const int startIdx, const int stride) {
       // todo: if( startIdx + stride*DIM > DIM*DIM ) { raise error };
 
       if(DIM < 2) { return; }
@@ -192,7 +190,7 @@ namespace threes {
       // position where we will shift the remaining cards.
       // If that position is DIM, there was no valid card combination
       unsigned shiftDestination = DIM;
-      for(unsigned i = 0; i < (DIM-1); ++i) {
+      for(unsigned i = 0; (i < (DIM-1)) && (shiftDestination==DIM); ++i) {
 	const unsigned currIdx = startIdx + i*stride;
 	const unsigned nextIdx = startIdx + (i+1)*stride;
 
@@ -202,7 +200,6 @@ namespace threes {
 	  curr.value += next.value;
 	  shiftDestination = i+1;
 	}
-	
       }
 
       // shift all remaining cards by 1 stride
@@ -228,8 +225,8 @@ namespace threes {
     /////////////////////
 
     
-    template<unsigned DIM>
-    bool Board<DIM>::canShiftSlice(const int startIdx, const int stride) const {
+    template<unsigned DIM, class RAND_GEN>
+    bool Board<DIM, RAND_GEN>::canShiftSlice(const int startIdx, const int stride) const {
       // todo: if( startIdx + stride*DIM > DIM*DIM ) { raise error };
 
       if(DIM < 2) { return false; }
