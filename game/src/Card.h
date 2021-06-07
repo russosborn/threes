@@ -20,8 +20,7 @@ namespace threes {
 
       bool canCombine(const Card& other) const {
 	bool isEmpty = ((value == 0) || (other.value==0));
-	bool isBaseCombo = (value == 1 && other.value == 2) ||
-	                   (other.value == 2 && value == 1);
+	bool isBaseCombo = ( (value + other.value) == 3 );
 	bool isMatch = (value > 2 && value == other.value);
 
 	return (isEmpty || isBaseCombo || isMatch);

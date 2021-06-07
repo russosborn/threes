@@ -167,9 +167,10 @@ namespace threes {
 	arrayIdxInsert = DIM*insertIdx;
       } else if (dir == DIRECTION_LEFT) {
 	// insert in the the last column
-	arrayIdxInsert = DIM+DIM*insertIdx;
+	arrayIdxInsert = (DIM-1)+DIM*insertIdx;
       }
-      ro::ASSERT(arrayIdxInsert > 0, "invalid insertion dir");
+      const bool validIdxFound(arrayIdxInsert >= 0);
+      ro::ASSERT(validIdxFound, "invalid insertion dir");
 
       ro::ASSERT(m_data[arrayIdxInsert] == 0, "trying to insert at already occupied slot");
       m_data[arrayIdxInsert] = insertVal;
