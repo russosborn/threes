@@ -94,6 +94,164 @@ TEST(BoardState, BasicAssertions) {
   EXPECT_EQ( cardOne,  testBoard.cardAtIndex(2,1) ); // middle column can't shift down
   EXPECT_EQ( cardTwo,  testBoard.cardAtIndex(0,0) ); // newly inserted 2
   EXPECT_EQ( cardTwo,  testBoard.cardAtIndex(1,0) ); // pvsly inserted 2
+}
 
+TEST(BoardState, ShiftDown) {
+  threes::game::Board<3,AlwaysGenerateMinVal> testBoard; // starts as 3x3 of value 0
+
+  const threes::game::Card cardZero(0);
+  const threes::game::Card cardOne(1);
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) );
+  EXPECT_EQ( cardZero,testBoard.cardAtIndex(2,0) );
+
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) );
   
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
+
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
+  
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,2) ); 
+
+}
+
+TEST(BoardState, ShiftUp) {
+  threes::game::Board<3,AlwaysGenerateMinVal> testBoard; // starts as 3x3 of value 0
+
+  const threes::game::Card cardZero(0);
+  const threes::game::Card cardOne(1);
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  EXPECT_EQ( cardZero,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) );
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) );
+
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) );
+  
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
+
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
+  
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,2) ); 
+
+}
+
+TEST(BoardState, ShiftLeft) {
+  threes::game::Board<3,AlwaysGenerateMinVal> testBoard; // starts as 3x3 of value 0
+
+  const threes::game::Card cardZero(0);
+  const threes::game::Card cardOne(1);
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
+  EXPECT_EQ( cardZero,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) );
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) );
+
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) );
+  
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
+  
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,2) ); 
+
+}
+
+TEST(BoardState, ShiftRight) {
+  threes::game::Board<3,AlwaysGenerateMinVal> testBoard; // starts as 3x3 of value 0
+
+  const threes::game::Card cardZero(0);
+  const threes::game::Card cardOne(1);
+  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) );
+  EXPECT_EQ( cardZero,testBoard.cardAtIndex(0,2) );
+
+  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) );
+  
+  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
+  
+  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,2) ); 
+
 }

@@ -52,6 +52,10 @@ namespace threes {
       bool canShiftVertical() const;
       bool canShiftHorizontal() const;
 
+      // (hacky?) helper for some random sequence algorithms
+      // (importantly, the offical one)
+      const Card& maxCard() const { return m_max; }
+      
       void shiftBoard(const ShiftDirection dir, const Card insertVal);
       
     private:
@@ -74,7 +78,8 @@ namespace threes {
     private:
       
       std::array<Card,DIM*DIM> m_data;
-
+      Card m_max;
+      
     };
 
 
@@ -174,6 +179,7 @@ namespace threes {
 
       ro::ASSERT(m_data[arrayIdxInsert] == 0, "trying to insert at already occupied slot");
       m_data[arrayIdxInsert] = insertVal;
+      if(insertVal > m_max.value) { m_max = insertVal; }
     }
       
     ////////////////////
@@ -199,6 +205,11 @@ namespace threes {
 	const Card& next = m_data[nextIdx];
 	if( curr.canCombine(next) ) {
 	  curr.value += next.value;
+	  // update max state
+	  if( curr.value > m_max.value ) {
+	    m_max.value = curr.value;
+	  }
+	  
 	  shiftDestination = i+1;
 	}
       }

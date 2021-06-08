@@ -13,7 +13,7 @@ namespace threes {
     // powers of two, but whatever.
     struct Card {
        // type out the constructor for clarity's sake
-      Card(const unsigned initVal) : value(initVal) {}
+      constexpr Card(const unsigned initVal) : value(initVal) {}
       Card() : value(0) {}
       
       unsigned value;
@@ -28,7 +28,10 @@ namespace threes {
 
       bool operator> (const Card& other)  const { return value > other.value; }
       bool operator> (const int otherVal) const { return value > otherVal;  }
+      bool operator< (const Card& other)  const { return value < other.value; }
+      bool operator< (const int otherVal) const { return value < otherVal;  }
       bool operator==(const Card& other)  const { return value == other.value; }
+      bool operator!=(const Card& other)  const { return value != other.value; }
     };
 
     

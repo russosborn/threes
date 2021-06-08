@@ -30,8 +30,8 @@ enable_testing()
 
 add_executable(
   example_test
-  ${CMAKE_SOURCE_DIR}/test/example.cc
   ${CMAKE_SOURCE_DIR}/test/GameStateTests.cc
+  ${CMAKE_SOURCE_DIR}/test/CardSequenceTests.cc
 )
 target_link_libraries(
   example_test

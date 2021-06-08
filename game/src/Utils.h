@@ -4,7 +4,7 @@
 
 namespace ro {
 
-  void ASSERT(bool condition, const char* message) {
+  inline void ASSERT(bool condition, const char* message) {
     assert((message, condition));
   }
   
