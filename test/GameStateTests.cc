@@ -19,12 +19,14 @@ private:
 };
 
 
+using threes::game::Card;
 
 // Demonstrate some basic assertions.
 TEST(BoardState, BasicAssertions) {
-  threes::game::Board<3,AlwaysGenerateMinVal> testBoard; // starts as 3x3 of value 0
+  std::vector<Card> emptyInitialCards{};
+  threes::game::Board<3,AlwaysGenerateMinVal>
+    testBoard(emptyInitialCards); // starts as 3x3 of value 0
 
-  // should add Card(1)
   const threes::game::Card cardZero(0);
   const threes::game::Card cardOne(1);
   const threes::game::Card cardTwo(2);
@@ -97,7 +99,9 @@ TEST(BoardState, BasicAssertions) {
 }
 
 TEST(BoardState, ShiftDown) {
-  threes::game::Board<3,AlwaysGenerateMinVal> testBoard; // starts as 3x3 of value 0
+  std::vector<Card> emptyInitialCards{};
+  threes::game::Board<3,AlwaysGenerateMinVal>
+    testBoard(emptyInitialCards); // starts as 3x3 of value 0
 
   const threes::game::Card cardZero(0);
   const threes::game::Card cardOne(1);
@@ -138,7 +142,9 @@ TEST(BoardState, ShiftDown) {
 }
 
 TEST(BoardState, ShiftUp) {
-  threes::game::Board<3,AlwaysGenerateMinVal> testBoard; // starts as 3x3 of value 0
+  std::vector<Card> emptyInitialCards{};
+  threes::game::Board<3,AlwaysGenerateMinVal>
+    testBoard(emptyInitialCards); // starts as 3x3 of value 0
 
   const threes::game::Card cardZero(0);
   const threes::game::Card cardOne(1);
@@ -179,7 +185,9 @@ TEST(BoardState, ShiftUp) {
 }
 
 TEST(BoardState, ShiftLeft) {
-  threes::game::Board<3,AlwaysGenerateMinVal> testBoard; // starts as 3x3 of value 0
+  std::vector<Card> emptyInitialCards{};
+  threes::game::Board<3,AlwaysGenerateMinVal>
+        testBoard(emptyInitialCards); // starts as 3x3 of value 0
 
   const threes::game::Card cardZero(0);
   const threes::game::Card cardOne(1);
@@ -218,7 +226,9 @@ TEST(BoardState, ShiftLeft) {
 }
 
 TEST(BoardState, ShiftRight) {
-  threes::game::Board<3,AlwaysGenerateMinVal> testBoard; // starts as 3x3 of value 0
+  std::vector<Card> emptyInitialCards{};
+  threes::game::Board<3,AlwaysGenerateMinVal>
+    testBoard(emptyInitialCards); // starts as 3x3 of value 0
 
   const threes::game::Card cardZero(0);
   const threes::game::Card cardOne(1);

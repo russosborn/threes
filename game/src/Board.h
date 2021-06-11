@@ -6,6 +6,7 @@
 
 #include <array>
 #include <random>
+#include <algorithm>
 #include "Utils.h"
 #include "Card.h"
 
@@ -35,7 +36,7 @@ namespace threes {
       using storage_t = std::array<Card,DIM*DIM>;
       
     public:
-      Board();
+      Board(std::vector<Card> initialCards);
 
       // const access to underlying data
     public:
@@ -88,10 +89,30 @@ namespace threes {
     ///////////////////////////////////////////////
 
     template<unsigned DIM, class RAND_GEN>
-    Board<DIM, RAND_GEN>::Board() {
+    Board<DIM, RAND_GEN>::Board(std::vector<Card> initialCards) {
       // for clarity/any potential future underlying changes,
       // this happens automatically with defaults
       std::fill(m_data.begin(), m_data.end(), Card(0));
+
+      const unsigned numStartCards = initialCards.size();
+      ro::ASSERT( numStartCards < (DIM*DIM),
+		  "can't start with more cards than spaces on the board" );
+      
+      // shuffle the indices 0 .. (DIM*DIM)-1 and select the first numStartCards of them
+      // to place the initial cards.
+      std::vector<unsigned> oneToN(DIM*DIM);
+      std::iota( std::begin(oneToN), std::end(oneToN), 0);
+      
+      // Inefficient if DIM*DIM very big and numStartCards small, but practical for
+      // reasonable cases and only called once per game.
+      std::shuffle(std::begin(oneToN), std::end(oneToN),
+		   std::mt19937{ std::random_device{}() } );
+
+      // select the first X random incidies and copy the start cards in there
+      for(unsigned i=0; i < numStartCards; ++i) {
+	m_data[oneToN[i]] = initialCards[i];
+      }
+      
     }
 
     /////////////////////
@@ -99,7 +120,10 @@ namespace threes {
     template<unsigned DIM, class RAND_GEN>
     bool Board<DIM, RAND_GEN>::canShiftVertical() const {
       for(int i=0; i<DIM; ++i) {
-	if( canShiftSlice( i, static_cast<int>(DIM) ) ) {
+	// test shifting one row down iterating across top row
+	// or shifting one row up iterating across bottom row
+	if( canShiftSlice( i, static_cast<int>(DIM) ) ||
+	    canShiftSlice( static_cast<int>(DIM*DIM-1)+i, -1*static_cast<int>(DIM) )   ) {
 	  return(true);
 	}
       }
@@ -111,7 +135,10 @@ namespace threes {
     template<unsigned DIM, class RAND_GEN>
     bool Board<DIM, RAND_GEN>::canShiftHorizontal() const {
       for(int i=0; i<DIM; ++i) {
-	if( canShiftSlice( static_cast<int>(DIM)*i, 1 ) ) {
+	// test shifting one column right iterating down left column
+	// or shifting one column left iterating down right column
+	if( canShiftSlice( static_cast<int>(DIM)*i,  1 ) ||
+	    canShiftSlice( static_cast<int>(DIM)*i+static_cast<int>(DIM-1), -1 ) ) {
 	  return(true);
 	}
       }
@@ -239,7 +266,9 @@ namespace threes {
     
     template<unsigned DIM, class RAND_GEN>
     bool Board<DIM, RAND_GEN>::canShiftSlice(const int startIdx, const int stride) const {
-      // todo: if( startIdx + stride*DIM > DIM*DIM ) { raise error };
+      ro::ASSERT(startIdx + stride*(DIM-1) <= DIM*DIM, "shifting off the end of the board");
+      ro::ASSERT(startIdx + stride*(DIM-1) >=0, "shifting off the beginning of the board");
+      // todo: if(  ) { raise error };
 
       if(DIM < 2) { return false; }
 

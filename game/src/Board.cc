@@ -4,4 +4,4 @@
 using namespace threes::game;
 
 
-Board<5> b;
+Board<5> b(std::vector<Card>{});
