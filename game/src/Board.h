@@ -107,14 +107,14 @@ namespace threes {
       std::fill(m_data.begin(), m_data.end(), Card(0));
 
       const unsigned numStartCards = initialCards.size();
-      ro::ASSERT( numStartCards < (DIM*DIM),
+      ASSERT( numStartCards < (DIM*DIM),
 		  "can't start with more cards than spaces on the board" );
 
       std::vector<unsigned> randomInsertIndices(numStartCards);
       if( insertLocations.size() == 0) {
 	randomInsertIndices = pickNRandomIndicies(numStartCards, DIM);
       } else {
-	ro::ASSERT( randomInsertIndices.size() == initialCards.size(),
+	ASSERT( randomInsertIndices.size() == initialCards.size(),
 		    "num insert locations != num insert cards!" );
 	randomInsertIndices = insertLocations;
       }
@@ -189,7 +189,7 @@ namespace threes {
 
       const bool isVertical = (dir == DIRECTION_UP || dir == DIRECTION_DOWN);
       
-      ro::ASSERT( canShift(dir),
+      ASSERT( canShift(dir),
 		  "requested a vertical shift but board can't shift that way" );
 
       std::vector<int> validShiftIdx;
@@ -246,9 +246,9 @@ namespace threes {
 	arrayIdxInsert = (DIM-1)+DIM*insertIdx;
       }
       const bool validIdxFound(arrayIdxInsert >= 0);
-      ro::ASSERT(validIdxFound, "invalid insertion dir");
+      ASSERT(validIdxFound, "invalid insertion dir");
 
-      ro::ASSERT(m_data[arrayIdxInsert] == 0, "trying to insert at already occupied slot");
+      ASSERT(m_data[arrayIdxInsert] == 0, "trying to insert at already occupied slot");
       m_data[arrayIdxInsert] = insertVal;
       if(insertVal > m_max.value) { m_max = insertVal; }
     }
@@ -310,8 +310,8 @@ namespace threes {
     
     template<unsigned DIM, class RAND_GEN>
     bool Board<DIM, RAND_GEN>::canShiftSlice(const int startIdx, const int stride) const {
-      ro::ASSERT(startIdx + stride*(DIM-1) <= DIM*DIM, "shifting off the end of the board");
-      ro::ASSERT(startIdx + stride*(DIM-1) >=0, "shifting off the beginning of the board");
+      ASSERT(startIdx + stride*(DIM-1) <= DIM*DIM, "shifting off the end of the board");
+      ASSERT(startIdx + stride*(DIM-1) >=0, "shifting off the beginning of the board");
       // todo: if(  ) { raise error };
 
       if(DIM < 2) { return false; }

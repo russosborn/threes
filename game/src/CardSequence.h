@@ -104,7 +104,7 @@ namespace threes {
       // todo: make this generic for non-3 based values
       static std::vector<Card> s_bonusCards; // sorted possible bonus card values
 
-      ro::ASSERT( !(S_BONUS_CARD_THRESHOLD > b.maxCard().value),
+      ASSERT( !(S_BONUS_CARD_THRESHOLD > b.maxCard().value),
 		 "board does not meet special card threshold");
 	
       const Card maxBonusCard = b.maxCard().value / S_BONUS_CARD_RATIO;
@@ -122,13 +122,13 @@ namespace threes {
       if( currMaxCard != maxBonusCard ) {
 	std::cerr << "max bonus card not an exact power of two "
 		  << "times 6: " << maxBonusCard.value << std::endl;
-	ro::ASSERT( false, "max bonus card not an exact match!" );
+	ASSERT( false, "max bonus card not an exact match!" );
       }
 
       std::random_device rd;
       std::mt19937 g(rd());
 
-      ro::ASSERT( s_bonusCards.size() > 0, "no bonus cards to draw");
+      ASSERT( s_bonusCards.size() > 0, "no bonus cards to draw");
       
       std::uniform_int_distribution<> dist(0, s_bonusCards.size()-1);
       return(s_bonusCards[dist(g)]);
