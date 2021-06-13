@@ -91,172 +91,141 @@ TEST(BoardState, BasicAssertions) {
 TEST(BoardState, ShiftDown) {
   const threes::game::Card cardZero(0);
   const threes::game::Card cardOne(1);
-  std::vector<Card> singleInitialCard{cardOne};
-  std::vector<unsigned> bottomRightIdx( 3*3-1 );
+  std::vector<Card> twoInitialCard{cardOne,cardOne};
+  std::vector<unsigned> topRightIdxs{1,2}; // row 0, columns 1 and 2
   threes::game::Board<3,AlwaysGenerateMinVal>
-    testBoard(singleInitialCard, bottomRightIdx); // starts as 3x3 of value 0
+    testBoard(twoInitialCard, topRightIdxs);
 
-  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) );
-  EXPECT_EQ( cardZero,testBoard.cardAtIndex(2,0) );
-
-  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) );
-  
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
-
-  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
   EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
-  
-  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
   EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,2) ); 
 
+  // could insert in column 1, 2, "randomizer" picks col 1
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) );
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) );
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,2) );
+
+  // Board is now
+  //  0 1 0 
+  //  0 1 0 
+  //  0 1 1 
+  EXPECT_FALSE( testBoard.canShift(threes::game::DIRECTION_DOWN) );
+  EXPECT_TRUE( testBoard.canShift(threes::game::DIRECTION_UP) );
+  
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(1,1) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(2,1) ); 
+  EXPECT_EQ( cardZero,testBoard.cardAtIndex(0,2) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(1,2) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(2,2) ); 
 }
+
 
 TEST(BoardState, ShiftUp) {
   const threes::game::Card cardZero(0);
   const threes::game::Card cardOne(1);
-
-  std::vector<Card> emptyInitialCards{};
+  std::vector<Card> twoInitialCard{cardOne,cardOne};
+  std::vector<unsigned> bottomRightIdxs{3*3-2,3*3-1}; // row 2, columns 1 and 2
   threes::game::Board<3,AlwaysGenerateMinVal>
-    testBoard(emptyInitialCards); // starts as 3x3 of value 0
+    testBoard(twoInitialCard, bottomRightIdxs);
 
-
-  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
-  EXPECT_EQ( cardZero,testBoard.cardAtIndex(0,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) );
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) );
-
-  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) );
-  
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
-
-  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
   EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
-  
-  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
   EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,2) ); 
 
-}
-
-TEST(BoardState, ShiftLeft) {
-  const threes::game::Card cardZero(0);
-  const threes::game::Card cardOne(1);
-  std::vector<Card> singleInitialCard{cardOne};
-  std::vector<unsigned> bottomRightIdx( 3*3-1 );
-  threes::game::Board<3,AlwaysGenerateMinVal>
-    testBoard(singleInitialCard, bottomRightIdx); // starts as 3x3 of value 0
-
-  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
-  EXPECT_EQ( cardZero,testBoard.cardAtIndex(0,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) );
+  // could insert in column 1, 2, randomizer picks col 1
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_UP, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) );
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) );
   EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) );
 
-  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) );
+  // Board is now
+  //  0 1 1 
+  //  0 1 0 
+  //  0 1 0 
+  EXPECT_FALSE( testBoard.canShift(threes::game::DIRECTION_UP) );
+  EXPECT_TRUE( testBoard.canShift(threes::game::DIRECTION_DOWN) );
   
-  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
-  
-  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,2) ); 
-
+  testBoard.shiftBoard(threes::game::DIRECTION_DOWN, cardOne);
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(1,1) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(2,1) ); 
+  EXPECT_EQ( cardZero,testBoard.cardAtIndex(2,2) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(1,2) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(0,2) ); 
 }
 
 TEST(BoardState, ShiftRight) {
   const threes::game::Card cardZero(0);
   const threes::game::Card cardOne(1);
-  std::vector<Card> singleInitialCard{cardOne};
-  std::vector<unsigned> bottomRightIdx( 3*3-1 );
+  std::vector<Card> twoInitialCard{cardOne,cardOne};
+  std::vector<unsigned> bottomLeftIdxs{3,6}; // col 0, row 1 and 2
   threes::game::Board<3,AlwaysGenerateMinVal>
-    testBoard(singleInitialCard, bottomRightIdx); 
+    testBoard(twoInitialCard, bottomLeftIdxs);
 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
+
+  // could insert in row 1, 2, randomizer picks col 1
   testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
   testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) );
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) );
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,2) );
+
+  // Board is now
+  //  0 0 0 
+  //  1 1 1 
+  //  0 0 1 
+  EXPECT_FALSE( testBoard.canShift(threes::game::DIRECTION_RIGHT) );
+  EXPECT_TRUE( testBoard.canShift(threes::game::DIRECTION_LEFT) );
+  
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(1,1) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(1,2) ); 
+  EXPECT_EQ( cardZero,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(2,1) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(2,2) ); 
+}
+
+
+TEST(BoardState, ShiftLeft) {
+  const threes::game::Card cardZero(0);
+  const threes::game::Card cardOne(1);
+  std::vector<Card> twoInitialCard{cardOne,cardOne};
+  std::vector<unsigned> topRightIdxs{2,5}; // col 2, row 1 and 2
+  threes::game::Board<3,AlwaysGenerateMinVal>
+    testBoard(twoInitialCard, topRightIdxs);
+
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
+
+  // could insert in row 1, 2, randomizer picks col 1
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
+  testBoard.shiftBoard(threes::game::DIRECTION_LEFT, cardOne);
   EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
   EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) );
-  EXPECT_EQ( cardZero,testBoard.cardAtIndex(0,2) );
-
-  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
   EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) );
-  
-  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
-  
-  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
-  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(0,2) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,2) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,0) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,1) ); 
-  EXPECT_EQ( cardOne,testBoard.cardAtIndex(2,2) ); 
+  EXPECT_EQ( cardOne,testBoard.cardAtIndex(1,0) );
 
+  // Board is now
+  //  1 1 1 
+  //  1 0 0 
+  //  0 0 0 
+  EXPECT_FALSE( testBoard.canShift(threes::game::DIRECTION_LEFT) );
+  EXPECT_TRUE( testBoard.canShift(threes::game::DIRECTION_RIGHT) );
+  
+  testBoard.shiftBoard(threes::game::DIRECTION_RIGHT, cardOne);
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(0,0) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(0,1) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(0,2) ); 
+  EXPECT_EQ( cardZero,testBoard.cardAtIndex(1,2) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(1,0) ); 
+  EXPECT_EQ( cardOne ,testBoard.cardAtIndex(1,1) ); 
 }

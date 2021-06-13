@@ -70,13 +70,14 @@ TEST(CardSequenceK28, SequenceTests) {
 
 TEST(DefaultBonusGen, BonusCardTests) {
   using BoardType = threes::game::Board<10, AlwaysGenerateMinVal>;
-  std::vector<Card> emptyInitialCards;
-  BoardType board(emptyInitialCards);
+  std::vector<Card> singleOne{Card(1)};
+  BoardType board(singleOne);
 
   threes::game::ShiftDirection dirUp(threes::game::DIRECTION_UP);
   board.shiftBoard(dirUp, Card(48)); // only one possible card, 6
   
   EXPECT_EQ(Card(6), threes::game::genBonusCard(board));
+  EXPECT_EQ(Card(48), board.maxCard());
 
   board.shiftBoard(dirUp, Card(96)); // two possible cards, 6 or 12
   // this is a little dirty because we're testing randomness
