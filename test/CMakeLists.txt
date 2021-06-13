@@ -33,10 +33,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/test/GameStateTests.cc
   ${CMAKE_SOURCE_DIR}/test/CardSequenceTests.cc
 )
-target_link_libraries(
-  example_test
-  gtest_main
-)
+target_link_libraries( example_test gtest_main game_src)
 
 include(GoogleTest)
 gtest_discover_tests(example_test)
