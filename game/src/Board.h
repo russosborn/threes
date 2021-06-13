@@ -55,8 +55,6 @@ namespace threes {
       // utilites for actually playing the game  
     public:
       bool canShift(const ShiftDirection dir) const;
-//      bool canShiftVertical() const;
-//      bool canShiftHorizontal() const;
 
       // (hacky?) helper for some random sequence algorithms
       // (importantly, the offical one)
@@ -150,36 +148,6 @@ namespace threes {
 
       return false;
     }
-    /////////////////////
-//    
-//    template<unsigned DIM, class RAND_GEN>
-//    bool Board<DIM, RAND_GEN>::canShiftVertical() const {
-//      for(int i=0; i<DIM; ++i) {
-//	// test shifting one row down iterating across top row
-//	// or shifting one row up iterating across bottom row
-//	if( canShiftSlice( i, static_cast<int>(DIM) ) ||
-//	    canShiftSlice( static_cast<int>(DIM*DIM-1)+i, -1*static_cast<int>(DIM) )   ) {
-//	  return(true);
-//	}
-//      }
-//      return(false);
-//    }
-//
-//    /////////////////////
-//    
-//    template<unsigned DIM, class RAND_GEN>
-//    bool Board<DIM, RAND_GEN>::canShiftHorizontal() const {
-//      for(int i=0; i<DIM; ++i) {
-//	// test shifting one column right iterating down left column
-//	// or shifting one column left iterating down right column
-//	if( canShiftSlice( static_cast<int>(DIM)*i,  1 ) ||
-//	    canShiftSlice( static_cast<int>(DIM)*i+static_cast<int>(DIM-1), -1 ) ) {
-//	  return(true);
-//	}
-//      }
-//      return(false);
-//    }
-//    
     /////////////////////
 
     template<unsigned DIM, class RAND_GEN>
