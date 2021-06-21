@@ -4,4 +4,4 @@ cmake -S . -B build
 
 cmake --build build
 
-./build/example_test
+./build/test/example_test

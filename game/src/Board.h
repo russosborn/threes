@@ -7,6 +7,7 @@
 #include <array>
 #include <random>
 #include <algorithm>
+#include <iostream>
 #include "Utils.h"
 #include "Card.h"
 
@@ -34,7 +35,9 @@ namespace threes {
 
     public:
       using storage_t = std::array<Card,DIM*DIM>;
-      
+      static constexpr unsigned dim = DIM;
+      static constexpr unsigned StateSize = sizeof(unsigned)*(DIM*DIM) +
+	sizeof(int) + sizeof(ShiftDirection);
     public:
       // For testing purposes allow owner to exactly specify starting
       // locations of the initial cards. Defaults to selecting uniform
@@ -48,6 +51,15 @@ namespace threes {
 	return m_data; 
       }
 
+      // writes Board<DIM>::StateSize bytes, returns num bytes written
+      unsigned write_binary(std::ostream& out) const {
+	if(!out.good()) { return 0; }
+	
+	out.write( reinterpret_cast<char*>(m_data.data()), sizeof(unsigned)*DIM*DIM );
+	out << m_prevInsertIdx << m_prevDir;
+	return StateSize;
+      }
+      
       const Card& cardAtIndex(const unsigned row, const unsigned col) const {
 	return matrixIndex(row, col);
       }

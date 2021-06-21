@@ -14,7 +14,6 @@ struct StrBase {
   const std::string m_str;
 };
 static ro::ObjectFromStrFactory<StrBase> s_StrBaseFactory;
-using StrBaseCreator = ro::ObjectFromStrFactory<StrBase>::ObjectCreator;
 using StrBasePtr = ro::ObjectFromStrFactory<StrBase>::ObjectPtr;
 
 struct ToLower : public StrBase {

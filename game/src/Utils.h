@@ -53,4 +53,19 @@ namespace ro {
   std::map<std::string, typename ObjectFromStrFactory<T>::ObjectCreator>
   ObjectFromStrFactory<T>::s_factories;
 
+
+  /* Example usage for some Base with Derived1/Derived2 derived classes:
+   * // instantiate factory
+   * using BaseFactory = ro::ObjectFromStrFactory<Base>;
+   * static BaseFactory s_BaseFactory;
+   * using BasePtr = BaseFactory::ObjectPtr;
+   *
+   * // or whatever factory methods
+   * BasePtr createDerived1(const std::string& cfg) { return(BasePtr(new Derived1(cfg))); }
+   * BasePtr createDerived2(const std::string& cfg) { return(BasePtr(new Derived2(cfg))); }
+   *
+   * s_BaseFactory.registerCreator("derived1", createDerived1);
+   * s_BaseFactory.registerCreator("derived2", createDerived2);
+   */
+  
 } // ns ro

@@ -22,16 +22,25 @@ namespace threes {
     template<class BOARD_TYPE>
     class ICardSequence {
     public:
+      using BoardPtrType = std::unique_ptr<BOARD_TYPE>;
+      using CardSeqFactory = ro::ObjectFromStrFactory< ICardSequence<BOARD_TYPE> >;
+      static CardSeqFactory s_factory;
+      using ICardSeqPtr = typename CardSeqFactory::ObjectPtr;
+
+    public:
       ICardSequence() {}
       virtual ~ICardSequence() {}
-      virtual Card draw(const BOARD_TYPE& b) = 0; // remove top card
-      virtual Card peek(const BOARD_TYPE& b) = 0; // peek at the top card
+      virtual Card draw(const BoardPtrType& b) = 0; // remove top card
+      virtual Card peek(const BoardPtrType& b) = 0; // peek at the top card
+
+    public:
+      virtual unsigned write_binary(std::ostream& out) const = 0;
     };
 
     // uniformly randomly select a Card with (b.maxCard()/S_BONUS_CARD_RATIO >= value > 3)
     // and value an exact power of 2 times six
     template<class BOARD_TYPE>
-    Card genBonusCard(const BOARD_TYPE& b);
+    Card genBonusCard(const std::unique_ptr<BOARD_TYPE>& b);
     
     // Implementation of the internet's best guess 
     // https://toucharcade.com/community/threads/threes-by-sirvo-llc.218248/page-27#post-3140044
@@ -45,15 +54,19 @@ namespace threes {
       return result;
     }
 
+    /////////////
+    
     template<class BOARD_TYPE>
     class Kamikaze28Sequence : public ICardSequence<BOARD_TYPE> {
       // public types to make deck contents and randomness generic 
     public:
+      using typename ICardSequence<BOARD_TYPE>::BoardPtrType;
+      
       // function that permutes a ShuffleDeckContents in place
       using ShuffleFunction = std::function<void(ShuffleDeckContents&)>;
 
       // function that decides whether or not to draw a bonus card
-      using BonusCardDraw = std::function<bool(const BOARD_TYPE&)>;
+      using BonusCardDraw = std::function<bool(const BoardPtrType&)>;
 
       // a standard default impl that does uniform shuffle 
       static inline void uniformShuffle(ShuffleDeckContents& deck) {
@@ -63,10 +76,12 @@ namespace threes {
 	std::shuffle(deck.begin(), deck.end(), g);
       }
 
-      static inline bool defaultBonusDraw(const BOARD_TYPE& board) {
+      static inline bool defaultBonusDraw(const BoardPtrType& boardPtr) {
+	if(!boardPtr) { return(false); }
+	
 	static const double s_randomOdds(1.0/21.0);
 	  
-	if(board.maxCard() < S_BONUS_CARD_THRESHOLD) { return false;}
+	if(boardPtr->maxCard() < S_BONUS_CARD_THRESHOLD) { return false;}
 	std::random_device rd;
 	std::mt19937 g(rd());
 
@@ -74,6 +89,8 @@ namespace threes {
 	const double randZeroOne = dist(g);
 	return(randZeroOne < s_randomOdds);
       }
+
+      static typename ICardSequence<BOARD_TYPE>::ICardSeqPtr create(const std::string& cfg);
       
     public:
       Kamikaze28Sequence(const ShuffleDeckContents& deck,
@@ -82,9 +99,18 @@ namespace threes {
 
       // ICardSequence interface
     public:
-      virtual Card draw(const BOARD_TYPE& b) override;
-      virtual Card peek(const BOARD_TYPE& b) override;
+      virtual Card draw(const BoardPtrType& b) override;
+      virtual Card peek(const BoardPtrType& b) override;
 
+    public:
+      // todo:: could optionally expose more state, e.g. what cards are still in the deck
+      // prior to next shuffle
+      virtual unsigned write_binary(std::ostream& out) const override {
+	if(!out.good()) { return 0; }
+	out << m_next.value;
+	return(sizeof( decltype(m_next.value) ));
+      }
+      
     private:
       ShuffleDeckContents m_deck;
       unsigned m_deckIdx; 
@@ -100,14 +126,14 @@ namespace threes {
 
     // todo: make this generic but also performant
     template<class BOARD_TYPE>
-    Card genBonusCard(const BOARD_TYPE& b) {
+    Card genBonusCard(const std::unique_ptr<BOARD_TYPE>& bPtr) {
       // todo: make this generic for non-3 based values
       static std::vector<Card> s_bonusCards; // sorted possible bonus card values
 
-      ASSERT( !(S_BONUS_CARD_THRESHOLD > b.maxCard().value),
+      ASSERT( !(S_BONUS_CARD_THRESHOLD > bPtr->maxCard().value),
 		 "board does not meet special card threshold");
 	
-      const Card maxBonusCard = b.maxCard().value / S_BONUS_CARD_RATIO;
+      const Card maxBonusCard = bPtr->maxCard().value / S_BONUS_CARD_RATIO;
       if(s_bonusCards.empty()) {
 	s_bonusCards.push_back(Card(S_BONUS_CARD_THRESHOLD.value/S_BONUS_CARD_RATIO));
       }
@@ -137,6 +163,21 @@ namespace threes {
     /////////////////////////////////////////
 
     template<class BOARD_TYPE>
+    typename ICardSequence<BOARD_TYPE>::ICardSeqPtr
+    Kamikaze28Sequence<BOARD_TYPE>::create(const std::string& cfg) {
+      if(cfg == "default") {
+	return ICardSequence<BOARD_TYPE>::ICardSeqPtr(
+	       new Kamikaze28Sequence<BOARD_TYPE>(threesDefaultShuffleDeck()));
+      } else {
+	ASSERT(false, "invalid k28seq config, only default supported");
+      }
+
+      return(nullptr);
+    }
+
+    /////////////////////////////////////////
+    
+    template<class BOARD_TYPE>
     Kamikaze28Sequence<BOARD_TYPE>::Kamikaze28Sequence(const ShuffleDeckContents& deck,
 						       ShuffleFunction shuffFunc,
 						       BonusCardDraw bonusDraw)
@@ -159,7 +200,7 @@ namespace threes {
     // we're returning the "next" card we have saved,
     // but updating "next" is the challenge
     template<class BOARD_TYPE>
-    Card Kamikaze28Sequence<BOARD_TYPE>::draw(const BOARD_TYPE& b) {
+    Card Kamikaze28Sequence<BOARD_TYPE>::draw(const BoardPtrType& b) {
       Card result = m_next;
 
       // draw bonus or from deck?
@@ -182,7 +223,7 @@ namespace threes {
     /////////////////////////////////////////
 
     template<class BOARD_TYPE>
-    Card Kamikaze28Sequence<BOARD_TYPE>::peek(const BOARD_TYPE& b) { return(m_next); }
+    Card Kamikaze28Sequence<BOARD_TYPE>::peek(const BoardPtrType& b) { return(m_next); }
 
     
   } // ns game

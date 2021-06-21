@@ -36,12 +36,12 @@ void nullShuffle(threes::game::ShuffleDeckContents& c) {
 TEST(CardSequenceK28, SequenceTests) {
   using BoardType = threes::game::Board<3, AlwaysGenerateMinVal>;
   std::vector<Card> emptyInitialCards;
-  BoardType unusedBoard(emptyInitialCards);
+  std::unique_ptr<BoardType> unusedBoard = std::make_unique<BoardType>(emptyInitialCards);
   
   threes::game::ShuffleDeckContents simpleContents{ Card(1), Card(2), Card(3) };
   
   threes::game::Kamikaze28Sequence<BoardType>
-    k28Seq( simpleContents, nullShuffle, alwaysFalse<BoardType>);
+    k28Seq( simpleContents, nullShuffle, alwaysFalse< std::unique_ptr<BoardType> >);
 
   EXPECT_EQ( k28Seq.peek(unusedBoard), Card(1) );
 
@@ -71,15 +71,15 @@ TEST(CardSequenceK28, SequenceTests) {
 TEST(DefaultBonusGen, BonusCardTests) {
   using BoardType = threes::game::Board<10, AlwaysGenerateMinVal>;
   std::vector<Card> singleOne{Card(1)};
-  BoardType board(singleOne);
+  std::unique_ptr<BoardType> board = std::make_unique<BoardType>(singleOne);
 
   threes::game::ShiftDirection dirUp(threes::game::DIRECTION_UP);
-  board.shiftBoard(dirUp, Card(48)); // only one possible card, 6
+  board->shiftBoard(dirUp, Card(48)); // only one possible card, 6
   
   EXPECT_EQ(Card(6), threes::game::genBonusCard(board));
-  EXPECT_EQ(Card(48), board.maxCard());
+  EXPECT_EQ(Card(48), board->maxCard());
 
-  board.shiftBoard(dirUp, Card(96)); // two possible cards, 6 or 12
+  board->shiftBoard(dirUp, Card(96)); // two possible cards, 6 or 12
   // this is a little dirty because we're testing randomness
   // by running over and over and confirming we get all expected values...
   std::set<Card> possibleCards{ Card(6), Card(12) };
