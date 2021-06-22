@@ -166,7 +166,7 @@ namespace threes {
     typename ICardSequence<BOARD_TYPE>::ICardSeqPtr
     Kamikaze28Sequence<BOARD_TYPE>::create(const std::string& cfg) {
       if(cfg == "default") {
-	return ICardSequence<BOARD_TYPE>::ICardSeqPtr(
+	return typename ICardSequence<BOARD_TYPE>::ICardSeqPtr(
 	       new Kamikaze28Sequence<BOARD_TYPE>(threesDefaultShuffleDeck()));
       } else {
 	ASSERT(false, "invalid k28seq config, only default supported");

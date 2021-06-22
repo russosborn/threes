@@ -6,6 +6,7 @@
 #include "Utils.h"
 
 #include <iostream>
+#include <iomanip>
 #include <memory>
 #include <random>
 #include <string>
@@ -24,50 +25,78 @@ namespace threes {
     class GameDriver {
     public:
       using BoardPtr = std::unique_ptr<BOARD> ;
-      using CardSequencePtr =  ICardSqeuence<BOARD>::ICardSeqPtr;
+      using CardSequencePtr =  typename ICardSequence<BOARD>::ICardSeqPtr;
       
     public:
-      GameDriver(BoardPtr boardPtr,
-		 CardSequencePtr sequencePtr,
-		 const unsigned numStartCards );
+      GameDriver(const std::string& sequencerType,
+		 const std::string& sequencerArgs,
+		 const unsigned numStartCards);
 
-      void play();
+      virtual uint64_t play() = 0; // returns the final score
 
     public:
       static constexpr unsigned StateSize = BOARD::StateSize; 
       
     protected:
-      virtual void render() const;
+      virtual void render() const = 0;
 
       MoveResult move(const ShiftDirection dir); 
 
       uint64_t gameScore() const;
 
       
-    private:
+    protected:
       BoardPtr m_boardPtr;
       CardSequencePtr m_cardSeqPtr;
       
     }; // class GameDriver
 
 
+    // specific impl using std::istream
+    // use std::cin for real play, some other stream for testing.
+    template<class BOARD>
+    class GameDriverIStream : public GameDriver<BOARD> {
+    public:
+      GameDriverIStream(const std::string& sequencerType,
+			const std::string& sequencerArgs,
+			const unsigned numStartCards,
+			std::istream& inputStream)
+	: GameDriver<BOARD>(sequencerType, sequencerArgs, numStartCards)
+	, m_inputStream(inputStream)
+	{}
+      
+      virtual uint64_t play() override;
+      
+    protected:
+      virtual void render() const override;
+
+
+    protected:
+      std::istream& m_inputStream;
+
+      using GameDriver<BOARD>::m_boardPtr;
+      using GameDriver<BOARD>::m_cardSeqPtr;
+      
+    }; // class GameDriverIStream
+    
     /////////////////////////////////////
     template<class BOARD>
     GameDriver<BOARD>::GameDriver(const std::string& sequencerType,
+				  const std::string& sequencerArgs,
 				  const unsigned numStartCards)
-      : m_cardSeqPtr(ICardSequence<BOARD>::s_factory.create(sequencerType))
+      : m_cardSeqPtr(ICardSequence<BOARD>::s_factory.create(sequencerType, sequencerArgs))
       {
 	std::vector<Card> initialCards(numStartCards);
-	for(auto itr = initalCards.begin(), itr != initialCars.end(); ++itr) {
+	for(auto itr = initialCards.begin(); itr != initialCards.end(); ++itr) {
 	  *itr = m_cardSeqPtr->draw(nullptr); // null board is okay, means we never get bonus cards
 	}
-	m_boardPtr = std::make_unique( initialCards );
+	m_boardPtr = std::make_unique<BOARD>( initialCards );
       }
 
     
 
     template<class BOARD>
-    void GameDriver<BOARD>::render() const {
+    void GameDriverIStream<BOARD>::render() const {
       static constexpr unsigned CardValuePrintWidth = 6;
       
       for(unsigned row = 0; row < BOARD::dim; ++row) {
@@ -86,8 +115,8 @@ namespace threes {
     MoveResult GameDriver<BOARD>::move(const ShiftDirection dir) {
       // if shift is valid, then apply it
       if( m_boardPtr->canShift(dir) ) {
-	Card toInsert = m_cardSeqPtr->draw()
-	  m_boardPtr->shiftBoard(dir, toInsert);
+	Card toInsert = m_cardSeqPtr->draw(m_boardPtr);
+	m_boardPtr->shiftBoard(dir, toInsert);
       } else {
 	return MOVE_INVALID;
       }
@@ -105,7 +134,7 @@ namespace threes {
 
 
     template<class BOARD>
-    uint64_t GameDriver<BOARD>::gameScore() {
+    uint64_t GameDriver<BOARD>::gameScore() const {
       // todo: should score counting logic be in the Card class or the
       // GameDriver class? For now, put it here so other GameDriver impls
       // can choose their own method.
@@ -121,7 +150,7 @@ namespace threes {
     
 
     template<class BOARD>
-    uint64_t GameDriver<BOARD>::play() {
+    uint64_t GameDriverIStream<BOARD>::play() {
       // using w/a/s/d for now because arrow keys are apparently
       // a platform-specific nightmare. Could possible solve with ncurses
       // or a real GUI
@@ -136,7 +165,7 @@ namespace threes {
 		    << "Try a different move. " << std::endl;
 	}
 	
-	std::cin >> moveChar;
+	m_inputStream >> moveChar;
 
 	bool validInput = true;
 	ShiftDirection moveDir;
@@ -159,15 +188,18 @@ namespace threes {
 	}
 
 	if( !validInput ) {
-	  std::cout << "HEY! Input one of w/a/s/d for up/left/down/right!"
+	  std::cout << "HEY! Input one of w/a/s/d for up/left/down/right!" << std::endl;
 	}
 	else {
-	  lastMove = move(moveDir);
+	  lastMove = this->move(moveDir);
 	}
       }
 
+      uint64_t score = this->gameScore();
       std::cout << "No more valid moves! Game over, your score is "
-		<< gameScore() << std::endl;
+		<< score << std::endl;
+
+      return score;
     }
     
   } // ns game 
