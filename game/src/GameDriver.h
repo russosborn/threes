@@ -102,12 +102,12 @@ namespace threes {
       for(unsigned row = 0; row < BOARD::dim; ++row) {
 	for(unsigned col = 0; col < BOARD::dim; ++col) {
 	  std::cout << std::setw(CardValuePrintWidth) <<
-	    m_boardPtr->cardAtIndex( row, col ).value << std::endl;
+	    m_boardPtr->cardAtIndex( row, col ).value;
 	}
 	std::cout << std::endl << std::endl;
       }
       std::cout << "Next: " << std::setw(CardValuePrintWidth) <<
-	m_cardSeqPtr->peek(m_boardPtr).value;
+	m_cardSeqPtr->peek(m_boardPtr).value << std::endl;
       
     }
     
@@ -140,7 +140,7 @@ namespace threes {
       // can choose their own method.
 
       auto boardData = m_boardPtr->underlyingDataRef();
-      uint64_t result;
+      uint64_t result=0;
       for( auto cardData : boardData ) {
 	// 1 and 2 don't contribute to score
 	if( cardData.value > 2) { result += cardData.value; }
@@ -159,6 +159,8 @@ namespace threes {
       MoveResult lastMove = MOVE_VALID;
       while( lastMove != END_GAME ) {
 
+	this->render();
+	
 	if( lastMove == MOVE_INVALID) {
 	  std::cout << "You tried move " << moveChar
 		    << " but that move is illegal."
@@ -196,8 +198,15 @@ namespace threes {
       }
 
       uint64_t score = this->gameScore();
+      std::cout << "******************************" << std::endl;
+      std::cout << "******************************" << std::endl;
+      std::cout << "******************************" << std::endl;
+
       std::cout << "No more valid moves! Game over, your score is "
 		<< score << std::endl;
+      std::cout << std::endl << std::endl;
+
+      this->render();
 
       return score;
     }

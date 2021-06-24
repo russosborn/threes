@@ -23,25 +23,18 @@ private:
 };
 
 
-// never any bonus cards
-template<class T>
-bool alwaysFalse(const T&) { return false; }
-
-// preserve deck order
-void nullShuffle(threes::game::ShuffleDeckContents& c) {
-  return;
-}
-
 
 TEST(CardSequenceK28, SequenceTests) {
   using BoardType = threes::game::Board<3, AlwaysGenerateMinVal>;
   std::vector<Card> emptyInitialCards;
   std::unique_ptr<BoardType> unusedBoard = std::make_unique<BoardType>(emptyInitialCards);
   
-  threes::game::ShuffleDeckContents simpleContents{ Card(1), Card(2), Card(3) };
+  threes::game::ShuffleDeckContents simpleContents =
+    threes::game::oneTwoThreeDeck(); // deckw with just 1,2,3
   
   threes::game::Kamikaze28Sequence<BoardType>
-    k28Seq( simpleContents, nullShuffle, alwaysFalse< std::unique_ptr<BoardType> >);
+    k28Seq( simpleContents, threes::game::nullShuffle,
+	    threes::game::alwaysFalse< std::unique_ptr<BoardType> >);
 
   EXPECT_EQ( k28Seq.peek(unusedBoard), Card(1) );
 

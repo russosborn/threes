@@ -37,14 +37,22 @@ namespace threes {
       virtual unsigned write_binary(std::ostream& out) const = 0;
     };
 
+    /*
+     * Collection ofFfree helper functions,  useful defaults for many shuffle algorithms, 
+     */
+
+    // BONUS CARD SELECTION
+    
     // uniformly randomly select a Card with (b.maxCard()/S_BONUS_CARD_RATIO >= value > 3)
     // and value an exact power of 2 times six
     template<class BOARD_TYPE>
     Card genBonusCard(const std::unique_ptr<BOARD_TYPE>& b);
+
+
+    // BASIC DECKS OF NEW CARDS DRAWN FOR INSERTION
     
     // Implementation of the internet's best guess 
     // https://toucharcade.com/community/threads/threes-by-sirvo-llc.218248/page-27#post-3140044
-
     using ShuffleDeckContents = std::vector<Card>;
     static ShuffleDeckContents threesDefaultShuffleDeck() {
       ShuffleDeckContents result = {
@@ -54,7 +62,42 @@ namespace threes {
       return result;
     }
 
-    /////////////
+    static ShuffleDeckContents oneTwoThreeDeck() {
+      ShuffleDeckContents result = { Card(1), Card(2), Card(3) };
+      return result;
+    }
+
+    // ALGORITHMS TO RANDOMLY SHUFFLE DECKS
+    
+    // shuffle algorithm that does nothing
+    void nullShuffle(ShuffleDeckContents& deck);
+
+    // a standard default impl that does uniform shuffle 
+    void uniformShuffle(ShuffleDeckContents& deck);
+
+    // BINARY PREDICATES TO DECIDE WHETHER OR NOT TO DRAW A BONUS CARD
+    
+    // never any bonus cards
+    template<class T>
+    bool alwaysFalse(const T&) { return false; }
+
+    // internet's best guess
+    template<typename BoardPtrType>
+    bool defaultBonusDraw(const BoardPtrType& boardPtr) {
+      if(!boardPtr) { return(false); }
+      
+      static const double s_randomOdds(1.0/21.0);
+      
+      if(boardPtr->maxCard() < S_BONUS_CARD_THRESHOLD) { return false;}
+      std::random_device rd;
+      std::mt19937 g(rd());
+      
+      std::uniform_real_distribution<> dist(0, 1.0);
+      const double randZeroOne = dist(g);
+      return(randZeroOne < s_randomOdds);
+    }
+
+    ///////////////////////////////
     
     template<class BOARD_TYPE>
     class Kamikaze28Sequence : public ICardSequence<BOARD_TYPE> {
@@ -68,34 +111,12 @@ namespace threes {
       // function that decides whether or not to draw a bonus card
       using BonusCardDraw = std::function<bool(const BoardPtrType&)>;
 
-      // a standard default impl that does uniform shuffle 
-      static inline void uniformShuffle(ShuffleDeckContents& deck) {
-	std::random_device rd;
-	std::mt19937 g(rd());
-
-	std::shuffle(deck.begin(), deck.end(), g);
-      }
-
-      static inline bool defaultBonusDraw(const BoardPtrType& boardPtr) {
-	if(!boardPtr) { return(false); }
-	
-	static const double s_randomOdds(1.0/21.0);
-	  
-	if(boardPtr->maxCard() < S_BONUS_CARD_THRESHOLD) { return false;}
-	std::random_device rd;
-	std::mt19937 g(rd());
-
-	std::uniform_real_distribution<> dist(0, 1.0);
-	const double randZeroOne = dist(g);
-	return(randZeroOne < s_randomOdds);
-      }
-
       static typename ICardSequence<BOARD_TYPE>::ICardSeqPtr create(const std::string& cfg);
       
     public:
       Kamikaze28Sequence(const ShuffleDeckContents& deck,
 			 ShuffleFunction shuffFunc = uniformShuffle,
-			 BonusCardDraw bonusDraw = defaultBonusDraw);
+			 BonusCardDraw bonusDraw = defaultBonusDraw<BoardPtrType>);
 
       // ICardSequence interface
     public:
@@ -168,8 +189,19 @@ namespace threes {
       if(cfg == "default") {
 	return typename ICardSequence<BOARD_TYPE>::ICardSeqPtr(
 	       new Kamikaze28Sequence<BOARD_TYPE>(threesDefaultShuffleDeck()));
-      } else {
-	ASSERT(false, "invalid k28seq config, only default supported");
+      } else if(cfg == "test") {
+	// simplest deck is only 1,2,3
+	// shuffle logic does nothing
+	// provides deterministic card sequencing, e.g. for tests
+	
+	return typename ICardSequence<BOARD_TYPE>::ICardSeqPtr(
+	  new Kamikaze28Sequence<BOARD_TYPE>(oneTwoThreeDeck(),
+					     nullShuffle,
+					     alwaysFalse<BoardPtrType>));
+	
+      }
+      else {
+	ASSERT(false, "invalid k28seq config, only default/test supported");
       }
 
       return(nullptr);

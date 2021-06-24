@@ -3,6 +3,7 @@
 #include <src/GameDriver.h>
 #include <src/Board.h>
 #include <iostream>
+#include <sstream> // for istringstream to fake user input from str
 
 // random generator that always returns min value in the
 // random range for testing purposes
@@ -29,6 +30,13 @@ TEST(GameDriver, Basic) {
   "k28d",
   threes::game::Kamikaze28Sequence<TestBoard>::create);
 
+  std::istringstream userInput("");
+  
   std::unique_ptr<threes::game::GameDriver<TestBoard>> game(
-    new threes::game::GameDriverIStream<TestBoard>("k28d", "default", 6, std::cin) );
+    new threes::game::GameDriverIStream<TestBoard>("k28d", "test", 1, std::cin) );
+
+  // new cards will always be 1,2,3 in that order.
+  // board starts with a single 1 
+  
+  
 }
