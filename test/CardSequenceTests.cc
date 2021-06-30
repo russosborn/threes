@@ -33,7 +33,7 @@ TEST(CardSequenceK28, SequenceTests) {
     threes::game::oneTwoThreeDeck(); // deckw with just 1,2,3
   
   threes::game::Kamikaze28Sequence<BoardType>
-    k28Seq( simpleContents, threes::game::nullShuffle,
+    k28Seq( simpleContents, threes::game::alwaysReturnNextIndex,
 	    threes::game::alwaysFalse< std::unique_ptr<BoardType> >);
 
   EXPECT_EQ( k28Seq.peek(unusedBoard), Card(1) );

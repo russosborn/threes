@@ -1,14 +1,14 @@
 #include <CardSequence.h>
 
-// shuffle algorithm that does nothing
-void threes::game::nullShuffle(threes::game::ShuffleDeckContents& deck) {
-  return;
+// no randomization
+unsigned threes::game::alwaysReturnNextIndex(const unsigned lower, const unsigned upper) {
+  return lower;
 }
 
 // a standard default impl that does uniform shuffle 
-void threes::game::uniformShuffle(threes::game::ShuffleDeckContents& deck) {
+unsigned threes::game::uniformRandomIndex(const unsigned lower, const unsigned upper) {
   std::random_device rd;
   std::mt19937 g(rd());
-  
-  std::shuffle(deck.begin(), deck.end(), g);
+  std::uniform_int_distribution<unsigned> dist(lower, upper);
+  return( dist(g) );
 }

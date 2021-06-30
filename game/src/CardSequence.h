@@ -70,11 +70,12 @@ namespace threes {
     // ALGORITHMS TO RANDOMLY SHUFFLE DECKS
     
     // shuffle algorithm that does nothing
-    void nullShuffle(ShuffleDeckContents& deck);
+    unsigned alwaysReturnNextIndex(const unsigned lower, const unsigned upper);
 
     // a standard default impl that does uniform shuffle 
-    void uniformShuffle(ShuffleDeckContents& deck);
+    unsigned uniformRandomIndex(const unsigned lower, const unsigned upper);
 
+    
     // BINARY PREDICATES TO DECIDE WHETHER OR NOT TO DRAW A BONUS CARD
     
     // never any bonus cards
@@ -106,7 +107,7 @@ namespace threes {
       using typename ICardSequence<BOARD_TYPE>::BoardPtrType;
       
       // function that permutes a ShuffleDeckContents in place
-      using ShuffleFunction = std::function<void(ShuffleDeckContents&)>;
+      using IndexSelectFunction = std::function<unsigned(const unsigned, const unsigned)>;
 
       // function that decides whether or not to draw a bonus card
       using BonusCardDraw = std::function<bool(const BoardPtrType&)>;
@@ -115,7 +116,7 @@ namespace threes {
       
     public:
       Kamikaze28Sequence(const ShuffleDeckContents& deck,
-			 ShuffleFunction shuffFunc = uniformShuffle,
+			 IndexSelectFunction idxSelect = uniformRandomIndex,
 			 BonusCardDraw bonusDraw = defaultBonusDraw<BoardPtrType>);
 
       // ICardSequence interface
@@ -131,13 +132,16 @@ namespace threes {
 	out << m_next.value;
 	return(sizeof( decltype(m_next.value) ));
       }
+
+    private:
+      void setupNextCard();
       
     private:
       ShuffleDeckContents m_deck;
       unsigned m_deckIdx; 
       Card m_next;
 
-      ShuffleFunction m_shuffleFunc;
+      IndexSelectFunction m_indexSelect;
       BonusCardDraw m_bonusDraw;
     };
 
@@ -196,7 +200,7 @@ namespace threes {
 	
 	return typename ICardSequence<BOARD_TYPE>::ICardSeqPtr(
 	  new Kamikaze28Sequence<BOARD_TYPE>(oneTwoThreeDeck(),
-					     nullShuffle,
+					     alwaysReturnNextIndex,
 					     alwaysFalse<BoardPtrType>));
 	
       }
@@ -211,18 +215,16 @@ namespace threes {
     
     template<class BOARD_TYPE>
     Kamikaze28Sequence<BOARD_TYPE>::Kamikaze28Sequence(const ShuffleDeckContents& deck,
-						       ShuffleFunction shuffFunc,
+						       IndexSelectFunction idxSelect,
 						       BonusCardDraw bonusDraw)
       : ICardSequence<BOARD_TYPE>()
       , m_deck(deck)
       , m_deckIdx(0)
-      , m_shuffleFunc(shuffFunc)
+      , m_indexSelect(idxSelect)
       , m_bonusDraw(bonusDraw)
       {
-	  m_shuffleFunc(m_deck);
-	  m_next = m_deck[m_deckIdx];
-	  ++m_deckIdx;
-	}
+	setupNextCard();
+      }
 
 
     
@@ -240,13 +242,8 @@ namespace threes {
 	m_next = genBonusCard(b);
       }
       else {
-	// check if at the end of the deck and need shuffle
-	if(m_deckIdx == m_deck.size()) {
-	  m_shuffleFunc(m_deck);
-	  m_deckIdx = 0;
-	}
-	m_next = m_deck[m_deckIdx];
-	++m_deckIdx;
+	// pick a remaining card at random
+	setupNextCard();
       }
 
       return(result);
@@ -256,6 +253,25 @@ namespace threes {
 
     template<class BOARD_TYPE>
     Card Kamikaze28Sequence<BOARD_TYPE>::peek(const BoardPtrType& b) { return(m_next); }
+
+
+    template<class BOARD_TYPE>
+    void Kamikaze28Sequence<BOARD_TYPE>::setupNextCard() {
+      const unsigned nextSelectedIdx =
+	m_indexSelect(m_deckIdx, m_deck.size());
+
+      // move the selected card to the top of the deck
+      std::swap( m_deck[m_deckIdx], m_deck[nextSelectedIdx] );
+
+      // pick the selected card off the top of the deck
+      m_next = m_deck[m_deckIdx];
+      ++m_deckIdx;
+
+      // if at the end of the deck, start over
+      if(m_deckIdx == m_deck.size()) {
+	m_deckIdx = 0;
+      }
+    }
 
     
   } // ns game
