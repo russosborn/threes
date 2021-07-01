@@ -21,6 +21,9 @@ namespace threes {
       bool canCombine(const Card& other) const {
 	//bool isEmpty = ((value == 0) || (other.value==0));
 
+	// can't combine a 0 on to anything
+	if(other.value == 0) { return false; }
+	
 	// can shift anything on to a 0, but can't
 	// shift a zero on to other cards
 	bool isEmpty = (value == 0 && other.value > 0);

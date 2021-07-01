@@ -135,6 +135,7 @@ namespace threes {
 
     template<class BOARD>
     uint64_t GameDriver<BOARD>::gameScore() const {
+      static constexpr double EPSILON = 1e-2;
       // todo: should score counting logic be in the Card class or the
       // GameDriver class? For now, put it here so other GameDriver impls
       // can choose their own method.
@@ -143,7 +144,13 @@ namespace threes {
       uint64_t result=0;
       for( auto cardData : boardData ) {
 	// 1 and 2 don't contribute to score
-	if( cardData.value > 2) { result += cardData.value; }
+	if( cardData.value > 2) {
+	  const double numTimesCombined =
+	    std::log2(static_cast<double>(cardData.value)/3.0 ) + 1.0;
+	  const double currCardScoreDbl = std::pow(3.0, numTimesCombined);
+
+	  result += static_cast<uint64_t>(currCardScoreDbl + EPSILON);
+	}
       }
       return result;
     }

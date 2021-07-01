@@ -229,3 +229,38 @@ TEST(BoardState, ShiftLeft) {
   EXPECT_EQ( cardOne ,testBoard.cardAtIndex(1,0) ); 
   EXPECT_EQ( cardOne ,testBoard.cardAtIndex(1,1) ); 
 }
+
+TEST(BoardState, BiggerBoard) {
+  const threes::game::Card card0(0);
+  const threes::game::Card card1(1);
+  const threes::game::Card card2(2);
+  const threes::game::Card card3(3);
+  const threes::game::Card card6(6);
+  const threes::game::Card card12(12);
+  const threes::game::Card card24(24);
+  const threes::game::Card card48(48);
+  std::vector<Card> initialCard{card3, card12, card1, card1, card48, card2, card3, card3,
+				   card24, card0, card2, card0, card6, card0, card2};
+  std::vector<unsigned> allIdx{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+  threes::game::Board<4,AlwaysGenerateMinVal>
+    testBoard(initialCard, allIdx);
+
+// want to set up board like this (from an interactive game)
+//
+//
+//    w
+//    3     12     1     1
+//    48     2     3     3
+//    24     0     2     0
+//    6      0     2     0
+  // this used to fail because 0 and 3 would combine (b/c 0+3 == 3)
+  EXPECT_FALSE( testBoard.canShift(threes::game::DIRECTION_UP) );
+}
+//
+//    w
+//    3     12     1     1
+//    48     2     3     3
+//    24     0     2     0
+//    6      0     2     1
+//
+

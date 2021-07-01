@@ -258,7 +258,7 @@ namespace threes {
     template<class BOARD_TYPE>
     void Kamikaze28Sequence<BOARD_TYPE>::setupNextCard() {
       const unsigned nextSelectedIdx =
-	m_indexSelect(m_deckIdx, m_deck.size());
+	m_indexSelect(m_deckIdx, m_deck.size()-1);
 
       // move the selected card to the top of the deck
       std::swap( m_deck[m_deckIdx], m_deck[nextSelectedIdx] );
@@ -271,6 +271,8 @@ namespace threes {
       if(m_deckIdx == m_deck.size()) {
 	m_deckIdx = 0;
       }
+
+      
     }
 
     
