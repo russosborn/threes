@@ -14,7 +14,7 @@
 namespace threes {
   namespace game {
 
-    enum ShiftDirection {
+    enum ShiftDirection :int {
       DIRECTION_UP,
       DIRECTION_DOWN,
       DIRECTION_LEFT,
@@ -51,13 +51,31 @@ namespace threes {
 	return m_data; 
       }
 
+      //////// SERIALIZATION /////////////
+      
       // writes Board<DIM>::StateSize bytes, returns num bytes written
       unsigned write_binary(std::ostream& out) const {
 	if(!out.good()) { return 0; }
 	
-	out.write( reinterpret_cast<char*>(m_data.data()), sizeof(unsigned)*DIM*DIM );
-	out << m_prevInsertIdx << m_prevDir;
+	out.write( reinterpret_cast<const char*>(m_data.data()), sizeof(unsigned)*DIM*DIM );
+	out.write( reinterpret_cast<const char*>(&m_max.value), sizeof(unsigned) );
+	out.write( reinterpret_cast<const char*>(&m_prevInsertIdx), sizeof(unsigned) );
+	out.write( reinterpret_cast<const char*>(&m_prevDir), sizeof(ShiftDirection) );
+	out.flush();
 	return StateSize;
+      }
+
+      bool read_binary(std::istream& in) {
+	if(!in.good()){ return false; }
+
+	in.read( reinterpret_cast<char*>(m_data.data()), sizeof(unsigned)*DIM*DIM );
+	unsigned maxVal(0);
+	in.read( reinterpret_cast<char*>(&maxVal), sizeof(unsigned) );
+	m_max = Card(maxVal);
+	in.read( reinterpret_cast<char*>(&m_prevInsertIdx), sizeof(unsigned) );
+	in.read( reinterpret_cast<char*>(&m_prevDir), sizeof(ShiftDirection) );
+
+	return true;
       }
       
       const Card& cardAtIndex(const unsigned row, const unsigned col) const {
@@ -73,6 +91,13 @@ namespace threes {
       const Card& maxCard() const { return m_max; }
       
       void shiftBoard(const ShiftDirection dir, const Card insertVal);
+
+      bool operator==(const Board<DIM,RAND_GEN>& other) const {
+	return( m_data == other.m_data &&
+		m_max == other.m_max &&
+		m_prevInsertIdx == other.m_prevInsertIdx &&
+		m_prevDir == other.m_prevDir );
+      }
       
     private:
       const Card& matrixIndex(const unsigned row, const unsigned col) const {
@@ -231,6 +256,8 @@ namespace threes {
       ASSERT(m_data[arrayIdxInsert] == 0, "trying to insert at already occupied slot");
       m_data[arrayIdxInsert] = insertVal;
       if(insertVal > m_max.value) { m_max = insertVal; }
+      m_prevDir = dir;
+      m_prevInsertIdx = insertIdx;
     }
       
     ////////////////////

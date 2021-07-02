@@ -35,8 +35,26 @@ namespace threes {
       virtual uint64_t play() = 0; // returns the final score
 
     public:
-      static constexpr unsigned StateSize = BOARD::StateSize; 
-      
+      // todo: for the moment, assume we are not privy to the
+      // internals of the CardSequence (if we want to change that,
+      // we should to make the CardSequence info a compile-time
+      // decision so we know how big the state is going to be)
+
+      // for now, state is the board and the "next" value from the card sequencer only
+      static constexpr unsigned StateSize = BOARD::StateSize + sizeof(unsigned); 
+
+      //////// SERIALIZATION /////////////
+      unsigned write_binary(std::ostream& out) const {
+	if(!out.good()) { return 0; }
+
+	m_boardPtr->write_binary(out);
+	out << m_cardSeqPtr->peek(m_boardPtr).value;
+	return StateSize;
+      }
+
+      // todo: how do we force the card sequence to read in the peeked value?
+      //      bool read_binary(std::istream& in);
+
     protected:
       virtual void render() const = 0;
 
