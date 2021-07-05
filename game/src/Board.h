@@ -18,7 +18,8 @@ namespace threes {
       DIRECTION_UP,
       DIRECTION_DOWN,
       DIRECTION_LEFT,
-      DIRECTION_RIGHT
+      DIRECTION_RIGHT,
+      NUM_DIRECTIONS
     };
 
     // helper to select some random indices for initial card insert

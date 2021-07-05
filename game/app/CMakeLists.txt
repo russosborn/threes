@@ -17,6 +17,12 @@ endforeach()
 add_executable(
   cli_main
   ${CMAKE_SOURCE_DIR}/game/app/main.cc
+  )
+
+add_executable(
+  stgy_main
+  ${CMAKE_SOURCE_DIR}/game/app/main_stgy.cc
 )
 target_link_libraries( cli_main game_src)
+target_link_libraries( stgy_main game_src)
 
