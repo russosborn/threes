@@ -38,7 +38,7 @@ namespace threes {
       }
 
     };
-    
+
 ////////////////////////////////////////////////////
     
     template<class BOARD>

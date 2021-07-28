@@ -143,14 +143,8 @@ namespace threes {
       auto boardData = m_boardPtr->underlyingDataRef();
       uint64_t result=0;
       for( auto cardData : boardData ) {
-	// 1 and 2 don't contribute to score
-	if( cardData.value > 2) {
-	  const double numTimesCombined =
-	    std::log2(static_cast<double>(cardData.value)/3.0 ) + 1.0;
-	  const double currCardScoreDbl = std::pow(3.0, numTimesCombined);
-
-	  result += static_cast<uint64_t>(currCardScoreDbl + EPSILON);
-	}
+	const double currCardScoreDbl = standardCardScore(cardData);
+	result += static_cast<uint64_t>(currCardScoreDbl + EPSILON);
       }
       return result;
     }

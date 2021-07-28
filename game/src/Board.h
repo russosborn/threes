@@ -39,6 +39,7 @@ namespace threes {
       static constexpr unsigned dim = DIM;
       static constexpr unsigned StateSize = sizeof(unsigned)*(DIM*DIM) +
 	sizeof(int) + sizeof(ShiftDirection);
+
     public:
       // For testing purposes allow owner to exactly specify starting
       // locations of the initial cards. Defaults to selecting uniform

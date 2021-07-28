@@ -4,6 +4,7 @@
  *
  */
 
+
 namespace threes {
   namespace game {
 
@@ -43,6 +44,7 @@ namespace threes {
       bool operator!=(const Card& other)  const { return value != other.value; }
     };
 
+    double standardCardScore(const Card cardData);
     
   } //namespace game
 } //namespace threes

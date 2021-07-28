@@ -34,6 +34,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/test/CardSequenceTests.cc
   ${CMAKE_SOURCE_DIR}/test/FactoryTests.cc
   ${CMAKE_SOURCE_DIR}/test/GameDriverTests.cc
+  ${CMAKE_SOURCE_DIR}/test/TreeStrategyTests.cc
 )
 target_link_libraries( example_test gtest_main game_src)
 
