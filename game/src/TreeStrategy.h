@@ -62,11 +62,11 @@ namespace threes {
 	  score += 2.0;
 	}
 	// next to a card twice its value
-	if( card1Val == (2 * card2Val) ) {
+	else if( card1Val == (2 * card2Val) ) {
 	  score += 2.0;
 	}
 	// card1 is 2x next card's value
-	if( card2Val == (2 * card1Val) ) {
+	else if( card2Val == (2 * card1Val) ) {
 	  score += 2.0;
 	}
 	return score;
@@ -111,7 +111,7 @@ namespace threes {
 	  The largest card gets a +3 bonus if it’s next to one wall, or a +6 bonus if it’s in a corner.
 	*/
 	double score(0.0);
-	auto rawBoardData(board.getUnderlyingDataRef());
+	auto rawBoardData(board.underlyingDataRef());
 	const std::array<unsigned, 3> topThree( getTopThreeValues( rawBoardData ) );
 
 	// check for empties everywhere
@@ -122,45 +122,48 @@ namespace threes {
 	// check matching adjacent cards, card next to card 2x its value
 	unsigned row=0, col=0;
 	for(unsigned i = 0; i < rawBoardData.size(); ++i) {
+
 	  const unsigned currCardVal = rawBoardData[i].value;
-	  // if current square is empty, give no bonuses for adjacency
-	  if( currCardVal == 0) { continue; }
+	  // if current square is empty, skip all the other bonuses
+	  if( currCardVal != 0) { 
 
-	  // check down+right so as to not double count
-	  if( col < BOARD::dim - 1) { // check across columns
-	    const unsigned neighborCardVal = rawBoardData[i+1].value;
-	    score += addScoreLogic(currCardVal, neighborCardVal);
-	  }
-	  if( row < BOARD::dim - 1) { // check across rows
-	    const unsigned neighborCardVal = rawBoardData[i+BOARD::dim].value;
-	    score += addScoreLogic(currCardVal, neighborCardVal);
-	  }
-	  //
-	  // "Trapped" penalties
-	  const bool trappedLeft (col == 0            || rawBoardData[i-1].value > currCardVal);
-	  const bool trappedRight(col == BOARD::dim-1 || rawBoardData[i+1].value > currCardVal);
-	  const bool trappedAbove(row == 0            || rawBoardData[i-BOARD::dim].value > currCardVal);
-	  const bool trappedBelow(row == BOARD::dim-1 || rawBoardData[i+BOARD::dim].value > currCardVal);
+	    // check down+right so as to not double count
+	    if( col < BOARD::dim - 1) { // check across columns
+	      const unsigned neighborCardVal = rawBoardData[i+1].value;
+	      score += addScoreLogic(currCardVal, neighborCardVal);
+	    }
+	    if( row < BOARD::dim - 1) { // check across rows
+	      const unsigned neighborCardVal = rawBoardData[i+BOARD::dim].value;
+	      score += addScoreLogic(currCardVal, neighborCardVal);
+	    }
+	    //
+	    // "Trapped" penalties
+	    const bool trappedLeft (col == 0            || rawBoardData[i-1].value > currCardVal);
+	    const bool trappedRight(col == BOARD::dim-1 || rawBoardData[i+1].value > currCardVal);
+	    const bool trappedAbove(row == 0            || rawBoardData[i-BOARD::dim].value > currCardVal);
+	    const bool trappedBelow(row == BOARD::dim-1 || rawBoardData[i+BOARD::dim].value > currCardVal);
 
-	  if( trappedLeft  && trappedRight ) { score -= 5.0; }
-	  if( trappedAbove && trappedBelow ) { score -= 5.0; }
-	  //
-	  // extra bonuses for largest/second largest/third largest special conditions
-	  const bool nextToWall = (row == 0 || col == 0 || row == BOARD::dim-1 || col == BOARD::dim-1);
-	  const bool inCorner   = ((row == 0 || row == BOARD::dim-1) &&
-	                           (col == 0 || col == BOARD::dim-1)   );
-	  if( currCardVal == topThree[0] && nextToWall ) { // third largest
-	    if(nextToOtherVal(row, col, topThree[1], rawBoardData)) { score += 1.0; }
-	  }
-	  else if( currCardVal == topThree[1] ) { // second largest
-	    if(nextToWall) { score += 1.0; }
-	    if(nextToOtherVal(row,col,topThree[2], rawBoardData)) { score += 1.0; }
-	  }
-	  else if( currCardVal == topThree[2] ) { // largest
-	    if(        inCorner ) { score += 6.0; }
-	    else if( nextToWall ) { score += 3.0; }
-	  }
+	    if( trappedLeft  && trappedRight ) { score -= 5.0; }
+	    if( trappedAbove && trappedBelow ) { score -= 5.0; }
+	    //
+	    // extra bonuses for largest/second largest/third largest special conditions
+	    const bool nextToWall = (row == 0 || col == 0 || row == BOARD::dim-1 || col == BOARD::dim-1);
+	    const bool inCorner   = ((row == 0 || row == BOARD::dim-1) &&
+				     (col == 0 || col == BOARD::dim-1)   );
+	    if( currCardVal == topThree[0] && nextToWall ) { // third largest
+	      if(nextToOtherVal(row, col, topThree[1], rawBoardData)) { score += 1.0; }
+	    }
+	    else if( currCardVal == topThree[1] ) { // second largest
+	      if(nextToWall) { score += 1.0; }
+	      if(nextToOtherVal(row,col,topThree[2], rawBoardData)) { score += 1.0; }
+	    }
+	    else if( currCardVal == topThree[2] ) { // largest
+	      if(        inCorner ) { score += 6.0; }
+	      else if( nextToWall ) { score += 3.0; }
+	    }
 
+	  } // end "if card != 0"
+	  
 	  // update the "matrix" indices
 	  ++col;
 	  if(col == BOARD::dim) { col = 0; ++row; }
