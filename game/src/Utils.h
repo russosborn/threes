@@ -6,6 +6,9 @@
 #include <memory>
 #include <functional>
 #include <map>
+
+#include <vector>
+#include <string>
 //  inline void ASSERT(bool condition, const char* message) {
 //    assert( (message, condition) );
 //  }
@@ -67,5 +70,8 @@ namespace ro {
    * s_BaseFactory.registerCreator("derived1", createDerived1);
    * s_BaseFactory.registerCreator("derived2", createDerived2);
    */
+
+
+  std::vector<std::string> strsplit(const std::string& str, const std::string& delim);
   
 } // ns ro

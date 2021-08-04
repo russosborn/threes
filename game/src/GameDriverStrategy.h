@@ -18,6 +18,9 @@ namespace threes {
 			      const typename ICardSequence<BOARD>::ICardSeqPtr& seqPtr) = 0;
 
       using ThreesStgyPtr = std::unique_ptr< IThreesStgy<BOARD> >;
+
+      using StgyFactory = ro::ObjectFromStrFactory< IThreesStgy<BOARD> >;
+      static StgyFactory s_factory;
       
     };
 
@@ -29,6 +32,8 @@ namespace threes {
       virtual ShiftDirection move(const typename GameDriver<BOARD>::BoardPtr& boardPtr,
 			      const typename ICardSequence<BOARD>::ICardSeqPtr& seqPtr) override {
 
+	(void)boardPtr; // here to preserve interface only, random stgy ignores it
+	(void)seqPtr; // here to preserve interface only, random stgy ignores it
 	std::random_device rd;
 	std::mt19937 g(rd());
 	//todo: this assumes contiguous direction ENUM starting at 0
@@ -37,6 +42,11 @@ namespace threes {
 	return ShiftDirection( dist(g) );
       }
 
+      static typename IThreesStgy<BOARD>::ThreesStgyPtr create(const std::string& args) {
+	(void)args; // here to preserve interface only
+	return typename IThreesStgy<BOARD>::ThreesStgyPtr( new RandomStgy() );
+      }
+      
     };
 
 ////////////////////////////////////////////////////
@@ -90,9 +100,13 @@ namespace threes {
 
       uint64_t score = this->gameScore();
 
+      defaultTerminalRender(m_boardPtr, m_cardSeqPtr);
+      
       std::cout << "No more valid moves! Game over, your score is "
 		<< score << std::endl;
       std::cout << std::endl << std::endl;
+
+      
       
       return score;
     }

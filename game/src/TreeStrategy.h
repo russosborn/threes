@@ -5,6 +5,8 @@
 
 #include "GameDriverStrategy.h"
 
+#include <limits>
+#include <string>
 
 namespace threes {
   namespace game {
@@ -13,14 +15,26 @@ namespace threes {
     template<class BOARD>
     class ExpectiMaxTree : public IThreesStgy<BOARD> {
     public:
-      virtual ShiftDirection move(const typename GameDriver<BOARD>::BoardPtr& boardPtr,
-			      const typename ICardSequence<BOARD>::ICardSeqPtr& seqPtr) override {
 
-	// for each direction in up, down, left right:
-	//   for each possible drawn card (how to handle bonus card, could be very large search space)
-	//       for each possible new card location:
-	//          expectedScore(board, 
+      ExpectiMaxTree(const unsigned depth, const unsigned samples)
+	: m_depth(depth)
+	, m_samples(samples)
+	{}
+      
+      static typename IThreesStgy<BOARD>::ThreesStgyPtr create(const std::string& args) {
+	auto argv = ro::strsplit( args, ";" );
+	ASSERT(argv.size() == 2,
+	       "Need two ';' delimited args for ExpectiMaxTree (depth and num samples)!");
+
+	const unsigned   depth(std::stoi(argv[0]));
+	const unsigned samples(std::stoi(argv[1]));
+	
+	return typename IThreesStgy<BOARD>::ThreesStgyPtr( new ExpectiMaxTree(depth, samples) );
       }
+
+      
+      virtual ShiftDirection move(const typename GameDriver<BOARD>::BoardPtr& boardPtr,
+				  const typename ICardSequence<BOARD>::ICardSeqPtr& seqPtr) override;
     public:
 
       static std::array<unsigned, 3> getTopThreeValues(const typename BOARD::storage_t& rawBoardData);
@@ -36,6 +50,10 @@ namespace threes {
 	
       double expectedValue( const BOARD& board, const ICardSequence<BOARD>& seq,
 			    const ShiftDirection move, const unsigned depth );
+
+    private:
+      const unsigned m_depth;
+      const unsigned m_samples;
       
     }; // class ExpectiMaxTree
 
@@ -43,6 +61,37 @@ namespace threes {
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
+
+
+    template<class BOARD>
+    ShiftDirection ExpectiMaxTree<BOARD>::move(const typename GameDriver<BOARD>::BoardPtr& boardPtr,
+   		               const typename ICardSequence<BOARD>::ICardSeqPtr& seqPtr) {
+
+	static constexpr std::array<ShiftDirection, NUM_DIRECTIONS>
+	  candidateMoves{ DIRECTION_UP, DIRECTION_DOWN, DIRECTION_LEFT, DIRECTION_RIGHT};
+
+	double bestEv(std::numeric_limits<double>::lowest());
+	ShiftDirection bestDir(DIRECTION_UP);
+	bool anyValid=false;
+	for(auto move : candidateMoves) {
+	  if( boardPtr->canShift(move) ) {
+	      anyValid = true;
+	      double accum = 0;
+	      for(unsigned i=0; i < m_samples; ++i ) {
+		accum += expectedValue(*(boardPtr.get()), *(seqPtr.get()), move, m_depth);
+	      }
+
+	      if( accum > bestEv ) {
+		bestEv = accum;
+		bestDir = move;
+	      }
+	    }
+	}
+
+	ASSERT(anyValid, "forced to pick a move, but there are no valid ones!");
+	
+	return(bestDir);
+    }
 
     
     // implementations
@@ -60,26 +109,30 @@ namespace threes {
 	candidateMoves{ DIRECTION_UP, DIRECTION_DOWN, DIRECTION_LEFT, DIRECTION_RIGHT};
 	  
       //   copy state to state'
-      BOARD boardCopy(board);
-      ICardSequence<BOARD> seqCopy(seq);
+      typename GameDriver<BOARD>::BoardPtr boardCopy(new BOARD(board));
+      typename ICardSequence<BOARD>::ICardSeqPtr seqCopy(seq.clone());
 
       //   update state' with move
-      ASSERT( boardCopy.canShift(move), "invalid shift request in EV calc");
-      Card insertCard(seqCopy.draw(boardCopy));
-      boardCopy.shiftBoard(move, insertCard);
+      ASSERT( boardCopy->canShift(move), "invalid shift request in EV calc");
+      Card insertCard(seqCopy->draw(boardCopy));
+      boardCopy->shiftBoard(move, insertCard);
 
       // for each valid move, determine expected value
       // of that move recursively
       unsigned numValidMoves(0);
       double accumulatedScore(0.0);
       for(auto candidateMove : candidateMoves) {
-	if( boardCopy.canShift(candidateMove) ) {
+	if( boardCopy->canShift(candidateMove) ) {
 	  ++numValidMoves;
-	  accumulatedScore += expectedValue(std::make_pair(boardCopy, seqCopy),
+	  accumulatedScore += expectedValue(*(boardCopy.get()), *(seqCopy.get()),
 					    candidateMove, depth-1);
 	}
       }
-
+      // todo: weird case here where no valid moves results in a score of 0... maybe that is okay?
+      if(numValidMoves == 0) {
+	return(0);
+      }
+      
       return accumulatedScore / static_cast<double>(numValidMoves);
     }
 
@@ -101,7 +154,7 @@ namespace threes {
 	 if they’re next to a wall and are next to a card of the second-largest size.
 	 The largest card gets a +3 bonus if it’s next to one wall, or a +6 bonus if it’s in a corner.
       */
-      double score(0.0);
+      double score(board.maxCard().value);
       auto rawBoardData(board.underlyingDataRef());
       const std::array<unsigned, 3> topThree( getTopThreeValues( rawBoardData ) );
 
@@ -116,16 +169,18 @@ namespace threes {
 
 	const unsigned currCardVal = rawBoardData[i].value;
 	// if current square is empty, skip all the other bonuses
-	if( currCardVal != 0) { 
+	if( currCardVal > 0) { 
 
 	  // check down+right so as to not double count
-	  if( col < BOARD::dim - 1) { // check across columns
-	    const unsigned neighborCardVal = rawBoardData[i+1].value;
-	    score += addScoreLogic(currCardVal, neighborCardVal);
-	  }
-	  if( row < BOARD::dim - 1) { // check across rows
-	    const unsigned neighborCardVal = rawBoardData[i+BOARD::dim].value;
-	    score += addScoreLogic(currCardVal, neighborCardVal);
+	  if( currCardVal > 2 ) {
+	    if( col < BOARD::dim - 1) { // check across columns
+	      const unsigned neighborCardVal = rawBoardData[i+1].value;
+	      score += addScoreLogic(currCardVal, neighborCardVal);
+	    }
+	    if( row < BOARD::dim - 1) { // check across rows
+	      const unsigned neighborCardVal = rawBoardData[i+BOARD::dim].value;
+	      score += addScoreLogic(currCardVal, neighborCardVal);
+	    }
 	  }
 	  //
 	  // "Trapped" penalties

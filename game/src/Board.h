@@ -8,6 +8,8 @@
 #include <random>
 #include <algorithm>
 #include <iostream>
+#include <iomanip>
+
 #include "Utils.h"
 #include "Card.h"
 
@@ -66,6 +68,20 @@ namespace threes {
 	return matrixIndex(row, col);
       }
 
+    public:
+      void print() const {
+	static constexpr unsigned CardValuePrintWidth = 6;
+	
+	for(unsigned row = 0; row < dim; ++row) {
+	  for(unsigned col = 0; col < dim; ++col) {
+	    std::cout << std::setw(CardValuePrintWidth) <<
+	      this->cardAtIndex( row, col ).value;
+	  }
+	  std::cout << std::endl << std::endl;
+	}
+
+      }
+      
       // utilites for actually playing the game  
     public:
       bool canShift(const ShiftDirection dir) const;

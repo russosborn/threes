@@ -10,4 +10,4 @@ include_directories(${threesGame_build_include_dirs})
 add_subdirectory( app )
 
 add_library(game_src)
-target_sources(game_src PUBLIC ${CMAKE_SOURCE_DIR}/game/src/Board.cc ${CMAKE_SOURCE_DIR}/game/src/CardSequence.cc ${CMAKE_SOURCE_DIR}/game/src/Card.cc)
+target_sources(game_src PUBLIC ${CMAKE_SOURCE_DIR}/game/src/Board.cc ${CMAKE_SOURCE_DIR}/game/src/CardSequence.cc ${CMAKE_SOURCE_DIR}/game/src/Card.cc ${CMAKE_SOURCE_DIR}/game/src/Utils.cc)

@@ -13,10 +13,10 @@ class AlwaysGenerateMinVal {
 public:
   AlwaysGenerateMinVal(const int min, const int max)
     : m_min(min)
-  {}
+  {(void)max;} // don't need, we always generate min. Only for interface purposes}
 
   template<typename RAND_GEN>
-  int operator()(RAND_GEN& rd) const { return(m_min); }
+  int operator()(RAND_GEN& rd) const { (void)rd; return(m_min); }
   
 private:
   const int m_min;
@@ -69,8 +69,9 @@ TEST(DefaultBonusGen, BonusCardTests) {
 
   threes::game::ShiftDirection dirUp(threes::game::DIRECTION_UP);
   board->shiftBoard(dirUp, Card(48)); // only one possible card, 6
-  
-  EXPECT_EQ(Card(6), threes::game::genBonusCard(board));
+
+  threes::game::BonusCardGenerator<BoardType> bonusGen;
+  EXPECT_EQ(Card(6), bonusGen(board));
   EXPECT_EQ(Card(48), board->maxCard());
 
   board->shiftBoard(dirUp, Card(96)); // two possible cards, 6 or 12
@@ -79,9 +80,9 @@ TEST(DefaultBonusGen, BonusCardTests) {
   std::set<Card> possibleCards{ Card(6), Card(12) };
   std::set<Card> cardsNotFound( possibleCards );
   for(unsigned i=0; i<50; ++i) {
-    auto possItr = possibleCards.find(threes::game::genBonusCard(board));
+    auto possItr = possibleCards.find(bonusGen(board));
     EXPECT_TRUE( possItr != possibleCards.end() );
-    auto notFoundItr = cardsNotFound.find(threes::game::genBonusCard(board));
+    auto notFoundItr = cardsNotFound.find(bonusGen(board));
     if(notFoundItr != cardsNotFound.end() ){
       cardsNotFound.erase(notFoundItr);
     }

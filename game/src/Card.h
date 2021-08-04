@@ -37,9 +37,9 @@ namespace threes {
       }
 
       bool operator> (const Card& other)  const { return value > other.value; }
-      bool operator> (const int otherVal) const { return value > otherVal;  }
+      bool operator> (const int otherVal) const { return (otherVal < 0 || (value > static_cast<unsigned>(otherVal)));  }
       bool operator< (const Card& other)  const { return value < other.value; }
-      bool operator< (const int otherVal) const { return value < otherVal;  }
+      bool operator< (const int otherVal) const { return (value < static_cast<unsigned>(otherVal) && otherVal > 0) ;  }
       bool operator==(const Card& other)  const { return value == other.value; }
       bool operator!=(const Card& other)  const { return value != other.value; }
     };

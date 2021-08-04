@@ -10,10 +10,10 @@ class AlwaysGenerateMinVal {
 public:
   AlwaysGenerateMinVal(const int min, const int max)
     : m_min(min)
-  {}
+  {(void)max;}
 
   template<typename RAND_GEN>
-  int operator()(RAND_GEN& rd) const { return(m_min); }
+  int operator()(RAND_GEN& rd) const { (void)rd; return(m_min); }
   
 private:
   const int m_min;
@@ -130,7 +130,6 @@ TEST(TreeStrategy, AddScoreLogic) {
   using BoardType = threes::game::Board<3, AlwaysGenerateMinVal>;
   using TreeStgy = threes::game::ExpectiMaxTree<BoardType>;
   
-  const unsigned cardZero(0);
   const unsigned cardOne(1);
   const unsigned cardTwo(2);
   const unsigned cardThree(3);
@@ -173,7 +172,7 @@ TEST(TreeStrategy, TotalScore) {
   // 0 0 3
 
   
-  TreeStgy stgy;
+  TreeStgy stgy(4, 100);
 
   double zeroScore = 3.0*6;
   double largeCornerScore = 6.0;

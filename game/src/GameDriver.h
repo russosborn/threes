@@ -20,6 +20,16 @@ namespace threes {
       END_GAME
     };
 
+    template<typename BOARD>
+    void defaultTerminalRender(const std::unique_ptr<BOARD>& boardPtr,
+			       const typename ICardSequence<BOARD>::ICardSeqPtr& cardSeqPtr) {
+
+      boardPtr->print();
+      
+      std::cout << "Next: " << std::setw(6) <<
+	cardSeqPtr->peek(boardPtr).value << std::endl;
+    }
+    
     // plays the game, renders things in ASCII and receives input from stdin
     template<class BOARD>
     class GameDriver {
@@ -97,16 +107,8 @@ namespace threes {
 
     template<class BOARD>
     void GameDriverIStream<BOARD>::render() const {
-      static constexpr unsigned CardValuePrintWidth = 6;
-      
-      for(unsigned row = 0; row < BOARD::dim; ++row) {
-	for(unsigned col = 0; col < BOARD::dim; ++col) {
-	  std::cout << std::setw(CardValuePrintWidth) <<
-	    m_boardPtr->cardAtIndex( row, col ).value;
-	}
-	std::cout << std::endl << std::endl;
-      }
-      std::cout << "Next: " << std::setw(CardValuePrintWidth) <<
+      m_boardPtr->print();
+      std::cout << "Next: " << std::setw(6) <<
 	m_cardSeqPtr->peek(m_boardPtr).value << std::endl;
       
     }
@@ -122,7 +124,6 @@ namespace threes {
       }
 
       // check to see if any new move can happen
-      bool anyRemainingMoves = false;
       for( auto dir : {DIRECTION_UP, DIRECTION_DOWN, DIRECTION_LEFT, DIRECTION_RIGHT} ) {
 	if( m_boardPtr->canShift(dir) ) {
 	  return MOVE_VALID;

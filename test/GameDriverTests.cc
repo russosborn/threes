@@ -11,10 +11,10 @@ class AlwaysGenerateMinVal {
 public:
   AlwaysGenerateMinVal(const int min, const int max)
     : m_min(min)
-  {}
+  {(void)max;}
 
   template<typename RAND_GEN>
-  int operator()(RAND_GEN& rd) const { return(m_min); }
+  int operator()(RAND_GEN& rd) const { (void) rd;return(m_min); }
   
 private:
   const int m_min;
